@@ -19,7 +19,7 @@ window.makeTextPDF = async function makeTextPDF({
   const contentHeight = fontSize * lineHeight;
   lines.forEach((line, index) => {
     doc.font(font).text(line, 0, contentHeight * index + dy, {
-      lineBreak: false,
+      lineBreak: false, 
     });
   });
   doc.end();

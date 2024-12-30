@@ -5,8 +5,10 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
+import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
+const basePath = production ? '/pdf-contracts/' : '/';
 
 export default {
   input: 'src/main.js',
@@ -33,6 +35,13 @@ export default {
       dedupe: ['svelte'],
     }),
     commonjs(),
+    replace({
+      preventAssignment: true,
+      'process.env.BASE_PATH': JSON.stringify(basePath),
+      '<!-- BASE -->': production
+    ? '<base href="/pdf-contracts/" />'
+    : '',
+    }),
     !production && serve(),
     !production && livereload('public'),
     production && terser(),

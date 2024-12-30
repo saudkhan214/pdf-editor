@@ -1,3 +1,4 @@
+import './utils/fetchInterceptor.js'
 import App from './App.svelte';
 import { getAsset } from './utils/prepareAssets.js';
 

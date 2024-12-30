@@ -1,16 +1,72 @@
-import { readAsArrayBuffer } from './asyncReader.js';
-import { fetchFont, getAsset } from './prepareAssets';
-import { noop } from './helper.js';
+import { readAsArrayBuffer } from "./asyncReader.js";
+import { fetchFont, getAsset } from "./prepareAssets";
+import { noop } from "./helper.js";
+import { config } from "./config.js";
 
-export async function save(pdfFile, objects, name) {
-  const PDFLib = await getAsset('PDFLib');
-  const download = await getAsset('download');
-  const makeTextPDF = await getAsset('makeTextPDF');
+export async function save(pdfFile, objects, tags, entityName) {
+  var data = new FormData();
+  data.append("pdf", pdfFile);
+  data.append("is_processed_pdf", false);
+  data.append("tags", JSON.stringify(tags));
+  data.append("entityName", entityName);
+  data.append("metaData", JSON.stringify(objects));
+  try {
+    var res = await fetch(`${config.API_HOST}/contract/save-pdf`, {
+      method: "POST",
+      body: data,
+    });
+    if (res.status != 200) {
+      const error = await res.json();
+      console.log(error);
+      return { error: error.error, success: false };
+    }
+    return { msg: "Pdf data saved", success: true };
+  } catch (ex) {
+    console.log(ex);
+    return { error: ex.message, success: false };
+  }
+}
+
+export async function edit(resource_id, pdfFile, objects, tags, contract_id) {
+  var data = new FormData();
+  data.append("pdf", pdfFile);
+  data.append("resourceId", resource_id);
+  data.append("contractId", contract_id);
+  data.append("tags", JSON.stringify(tags));
+  data.append("metaData", JSON.stringify(objects));
+  try {
+    var res = await fetch(`${config.API_HOST}/contract/update-pdf`, {
+      method: "POST",
+      body: data,
+    });
+    if (res.status != 200) {
+      const error = await res.json();
+      console.log(error);
+      return { error: error.error, success: false };
+    }
+    return { msg: "Pdf updated", success: true };
+  } catch (ex) {
+    console.log(ex);
+    return { error: ex.message, success: false };
+  }
+}
+
+export async function processPdf(
+  pdfFile,
+  objects,
+  name,
+  entityId,
+  entityName,
+  is_signing
+) {
+  const PDFLib = await getAsset("PDFLib");
+  const download = await getAsset("download");
+  const makeTextPDF = await getAsset("makeTextPDF");
   let pdfDoc;
   try {
     pdfDoc = await PDFLib.PDFDocument.load(await readAsArrayBuffer(pdfFile));
   } catch (e) {
-    console.log('Failed to load PDF.');
+    console.log("Failed to load PDF.");
     throw e;
   }
   const pagesProcesses = pdfDoc.getPages().map(async (page, pageIndex) => {
@@ -18,11 +74,11 @@ export async function save(pdfFile, objects, name) {
     // 'y' starts from bottom in PDFLib, use this to calculate y
     const pageHeight = page.getHeight();
     const embedProcesses = pageObjects.map(async (object) => {
-      if (object.type === 'image') {
+      if (object.type === "image") {
         let { file, x, y, width, height } = object;
         let img;
         try {
-          if (file.type === 'image/jpeg') {
+          if (file.type === "image/jpeg") {
             img = await pdfDoc.embedJpg(await readAsArrayBuffer(file));
           } else {
             img = await pdfDoc.embedPng(await readAsArrayBuffer(file));
@@ -35,10 +91,10 @@ export async function save(pdfFile, objects, name) {
               height,
             });
         } catch (e) {
-          console.log('Failed to embed image.', e);
+          console.log("Failed to embed image.", e);
           return noop;
         }
-      } else if (object.type === 'text') {
+      } else if (object.type === "text") {
         let { x, y, lines, lineHeight, size, fontFamily, width } = object;
         const height = size * lineHeight * lines.length;
         const font = await fetchFont(fontFamily);
@@ -51,7 +107,7 @@ export async function save(pdfFile, objects, name) {
             height,
             font: font.buffer || fontFamily, // built-in font family
             dy: font.correction(size, lineHeight),
-          }),
+          })
         );
         return () =>
           page.drawPage(textPage, {
@@ -60,7 +116,7 @@ export async function save(pdfFile, objects, name) {
             x,
             y: pageHeight - y - height,
           });
-      } else if (object.type === 'drawing') {
+      } else if (object.type === "drawing") {
         let { x, y, path, scale } = object;
         const {
           pushGraphicsState,
@@ -74,7 +130,7 @@ export async function save(pdfFile, objects, name) {
           page.pushOperators(
             pushGraphicsState(),
             setLineCap(LineCapStyle.Round),
-            setLineJoin(LineJoinStyle.Round),
+            setLineJoin(LineJoinStyle.Round)
           );
           page.drawSvgPath(path, {
             borderWidth: 5,
@@ -93,9 +149,24 @@ export async function save(pdfFile, objects, name) {
   await Promise.all(pagesProcesses);
   try {
     const pdfBytes = await pdfDoc.save();
-    download(pdfBytes, name, 'application/pdf');
+    // Convert Uint8Array to Blob
+    const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+    var data = new FormData();
+    data.append("pdf", pdfBlob, name);
+    data.append("is_processed_pdf", true);
+    data.append("entityName", entityName);
+    data.append("entityId", entityId);
+    if (is_signing) {
+      await fetch(`${config.API_HOST}/contract/save-pdf`, {
+        method: "POST",
+        body: data,
+      });
+    } else {
+      download(pdfBytes, name, "application/pdf");
+      // window.close()
+    }
   } catch (e) {
-    console.log('Failed to save PDF.');
+    console.log("Failed to process PDF.");
     throw e;
   }
 }
