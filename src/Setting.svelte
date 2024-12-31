@@ -47,6 +47,10 @@
         }
       } else {
         // For other non-signatory fields, continue adding them normally to the 'tag' object
+        if (key == "branch_id" || key == "property_reference") {
+          continue;
+        }
+
         tag[key] = value;
       }
     }
@@ -60,7 +64,7 @@
     //   return !signatory.email || !signatory.name; // true if any email or name is missing
     // });
     if (validated) {
-      alert("All fields are required");
+      alert("Fill the required fields");
       return;
     }
     dispatch("finish", tag);
@@ -97,7 +101,7 @@
   >
     <div class="grid grid-cols-2 gap-2 h-16">
       <div>
-        <label class="font-semibold text-xs">Template Name</label>
+        <label class="font-semibold text-xs">Template Name *</label>
         <input
           class="px-4 bg-gray-200 mt-2 w-full"
           name="template_name"
@@ -107,7 +111,7 @@
       </div>
 
       <div class="flex flex-col">
-        <label class="font-semibold text-xs">Module</label>
+        <label class="font-semibold text-xs">Module *</label>
         <select
           class="px-4 bg-gray-200 mt-2"
           name="module"
@@ -141,7 +145,7 @@
       </div>
 
       <div class="flex flex-col">
-        <label class="font-semibold text-xs">File</label>
+        <label class="font-semibold text-xs">File *</label>
         <select
           class="px-4 bg-gray-200 mt-2"
           name="file"
@@ -155,7 +159,7 @@
 
       {#if showStatus}
         <div class="flex flex-col">
-          <label class="font-semibold text-xs">Status</label>
+          <label class="font-semibold text-xs">Status *</label>
           <select
             class="px-4 bg-gray-200 mt-2"
             name="status"
