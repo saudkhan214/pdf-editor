@@ -134,7 +134,10 @@
   async function onUploadPDF(e) {
     const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
     const file = files[0];
-    if (!file || file.type !== "application/pdf") return;
+    if (!file || file.type !== "application/pdf") {
+      alert("Only PDF files are allowed.");
+      return;
+    }
     selectedPageIndex = -1;
     try {
       await addPDF(file);
@@ -396,7 +399,7 @@
           <img src="gesture.svg" alt="An icon for adding drawing" />
         </label>
       </div> -->
-      <!-- <a href="/editpdf/5646546544646" use:link replace>Replace this URL</a> -->
+    <!-- <a href="/editpdf/5646546544646" use:link replace>Replace this URL</a> -->
     <div class="flex flex-col justify-center md:mr-4">
       <label class="md:mr-2">Entities</label>
       <select on:change={entityChange}>

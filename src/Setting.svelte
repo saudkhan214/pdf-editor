@@ -47,9 +47,9 @@
         }
       } else {
         // For other non-signatory fields, continue adding them normally to the 'tag' object
-        if (key == "branch_id" || key == "property_reference") {
-          continue;
-        }
+        // if (key == "branch_id" || key == "property_reference") {
+        //   continue;
+        // }
 
         tag[key] = value;
       }
@@ -59,7 +59,10 @@
     // tag.signatories = signatories;
 
     tag["country"] = getCountryId();
-    const validated = Object.values(tag).some((x) => x == null || x == "");
+    var optionalTags = ["branch_id", "property_reference"];
+    const validated = Object.keys(tag)
+      .filter((x) => !optionalTags.includes(x))
+      .some((x) => tag[x] == null || tag[x] == "");
     // const signatoryValidated = signatories.some((signatory) => {
     //   return !signatory.email || !signatory.name; // true if any email or name is missing
     // });
