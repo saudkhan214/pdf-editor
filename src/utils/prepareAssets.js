@@ -67,30 +67,24 @@ const fonts = {
 // Available fonts
 export const Fonts = {
   ...fonts,
-  // 標楷體: {
-  //   src: "/CK.ttf", // 9.9 MB
+  // Arial: {
+  //   src: "./arial.ttf",
   //   correction(size, lineHeight) {
-  //     return (size * lineHeight - size) / 2;
+  //     return (size * lineHeight - size) / 2 + size / 8;
   //   },
   // },
-  Arial: {
-    src: "./arial.ttf",
-    correction(size, lineHeight) {
-      return (size * lineHeight - size) / 2 + size / 8;
-    },
-  },
-  Georgia: {
-    src:"./georgia.ttf",
-    correction(size, lineHeight) {
-      return (size * lineHeight - size) / 2 + size / 9;
-    },
-  },
-  Verdana: {
-    src:"./Verdana.ttf",
-    correction(size, lineHeight) {
-      return (size * lineHeight - size) / 2 + size / 12;
-    },
-  }
+  // Georgia: {
+  //   src:"./georgia.ttf",
+  //   correction(size, lineHeight) {
+  //     return (size * lineHeight - size) / 2 + size / 9;
+  //   },
+  // },
+  // Verdana: {
+  //   src:"./Verdana.ttf",
+  //   correction(size, lineHeight) {
+  //     return (size * lineHeight - size) / 2 + size / 12;
+  //   },
+  // }
 };
 
 export async function fetchFont(name) {

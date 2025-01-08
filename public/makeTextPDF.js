@@ -16,6 +16,17 @@ window.makeTextPDF = async function makeTextPDF({
   });
   const stream = doc.pipe(blobStream());
   doc.fontSize(fontSize);
+
+  // Measure the width of the longest line
+  const maxLineWidth = lines.reduce((maxWidth, line) => {
+    const lineWidth = doc.widthOfString(line);
+    return Math.max(maxWidth, lineWidth);
+  }, 0);
+
+  // Update the width dynamically based on the content
+  const adjustedWidth = Math.max(maxLineWidth, width); // Ensure it doesn't go below the provided width
+  // doc.options.size[0] = width-100;
+
   const contentHeight = fontSize * lineHeight;
   lines.forEach((line, index) => {
     doc.font(font).text(line, 0, contentHeight * index + dy, {
@@ -31,6 +42,23 @@ window.makeTextPDF = async function makeTextPDF({
     });
   });
 };
+
+ window.getTextWidth= function getTextWidth(lines,originalWidth) {
+  const doc = new PDFDocument({
+    margin: 0,
+    size: [0, 0],
+  });
+
+  // Measure the width of the longest line
+  const maxLineWidth = lines.reduce((maxWidth, line) => {
+    const lineWidth = doc.widthOfString(line);
+    return Math.max(maxWidth, lineWidth);
+  }, 0);
+
+  // Update the width dynamically based on the content
+  const adjustedWidth = Math.max(maxLineWidth, originalWidth);
+  return adjustedWidth
+}
 
 },{"blob-stream":159,"pdfkit":271}],2:[function(require,module,exports){
 (function (global){

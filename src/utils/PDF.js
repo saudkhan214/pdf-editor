@@ -98,6 +98,8 @@ export async function processPdf(
         let { x, y, lines, lineHeight, size, fontFamily, width } = object;
         const height = size * lineHeight * lines.length;
         const font = await fetchFont(fontFamily);
+        debugger;
+        width = getTextWidth(lines, width) + 5;
         const [textPage] = await pdfDoc.embedPdf(
           await makeTextPDF({
             lines,
