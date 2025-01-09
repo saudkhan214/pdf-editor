@@ -205,7 +205,7 @@
     const selectedOption = target.selectedOptions[0];
     const dataObj = JSON.parse(selectedOption.dataset.obj);
 
-    const text = target.value;
+    let text = target.value;
     text = `[${text}]`;
     const id = genID();
     await fetchFont(currentFont);

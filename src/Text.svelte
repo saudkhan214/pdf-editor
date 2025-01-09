@@ -135,7 +135,7 @@
   }
   function render() {
     editable.innerHTML = text;
-    editable.focus();
+    // editable.focus();
   }
   function extractLines() {
     const nodes = editable.childNodes;
@@ -184,7 +184,7 @@
         <img src={`${basePath}text.svg`} class="w-6 mr-2" alt="Font size" />
         <input
           type="number"
-          min="12"
+          min="6"
           max="120"
           step="1"
           class="h-6 w-12 text-center flex-shrink-0 rounded-sm"
