@@ -345,8 +345,8 @@
   bind:this={_win}
 >
   <div
-    class="fixed z-10 top-0 left-0 right-0 h-12 flex justify-center items-center
-      bg-gray-200 border-b border-gray-300"
+    class="fixed z-10 top-0 left-0 right-0 h-20 flex justify-center items-center
+      bg-white"
   >
     <input
       type="file"
@@ -363,9 +363,8 @@
       on:change={onUploadImage}
     />
     <label
-      class="whitespace-no-wrap bg-blue-500 hover:bg-blue-700 text-white
-        font-bold py-1 px-3 md:px-4 rounded mr-3 cursor-pointer md:mr-4"
-      for="pdf"
+    for="pdf"
+      class="whitespace-no-wrap bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 md:px-4 rounded mr-3 cursor-pointer md:mr-4 mt-6"
     >
       Choose PDF
     </label>
@@ -405,7 +404,7 @@
     <!-- <a href="/editpdf/5646546544646" use:link replace>Replace this URL</a> -->
     <div class="flex flex-col justify-center md:mr-4">
       <label class="md:mr-2">Entities</label>
-      <select on:change={entityChange}>
+      <select on:change={entityChange} class="p-1 rounded-xs border">
         <option disabled selected>--Select--</option>
         {#each placeHolders.Entities as entity, i (entity)}
           <option value={entity}>{entity}</option>
@@ -414,7 +413,7 @@
     </div>
     <div class="flex flex-col justify-center md:mr-4">
       <label class="md:mr-2">PlaceHolders</label>
-      <select on:change={placeHolderChange}>
+      <select on:change={placeHolderChange} class="p-1 rounded-xs border">
         <option disabled selected>--Select--</option>
         {#if _placeholders.length > 0}
           {#each _placeholders as _placeholder, i (_placeholder)}
@@ -430,8 +429,8 @@
     </div>
     <button
       on:click={openSettingDialoge}
-      class="w-20 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3
-        md:px-4 mr-3 md:mr-4 rounded"
+      class="w-20 bg-blue-600 hover:bg-blue-700 text-white py-1 px-3
+        md:px-4 mr-3 md:mr-4 rounded mt-6"
       class:cursor-not-allowed={pages.length === 0 || saving || !pdfFile}
       class:bg-blue-700={pages.length === 0 || saving || !pdfFile}
     >
@@ -478,7 +477,7 @@
     </div>
   {/if}
   {#if pages.length}
-    <div class="flex px-1 gap-2">
+    <div class="flex px-1 gap-2 mt-8">
       <div class="flex-1">
         {#each pages as page, pIndex (page)}
           <div
@@ -549,7 +548,7 @@
       </div>
       <div class="w-1/4">
         <h5
-          class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+          class="mb-2 text-2xl font-bold text-gray-900 dark:text-white"
         >
           Signatories
         </h5>
@@ -575,7 +574,7 @@
             viewBox="0 0 48 48"
           >
             <path
-              fill="#4caf50"
+              fill="#1f7bc1"
               d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
             ></path><path fill="#fff" d="M21,14h6v20h-6V14z"></path><path
               fill="#fff"
@@ -586,7 +585,7 @@
       </div>
     </div>
   {:else}
-    <div class="w-full flex-grow flex justify-center items-center">
+    <div class="w-1/2 flex justify-center items-center border-4 border-dashed border-gray-500 mt-10 py-48">
       <span class=" font-bold text-3xl text-gray-500">Drag something here</span>
     </div>
   {/if}

@@ -25,6 +25,13 @@
   };
 </script>
 
+<style>
+  /* Optional: You can add global styles here */
+  html, body {
+    font-family: 'Poppins', sans-serif;
+  }
+</style>
+
 <Router>
   <div>
     <Route path="/" component={Home} />
