@@ -103,7 +103,7 @@
       <div>
         <label class="font-semibold text-xs">Template Name *</label>
         <input
-          class="px-4 bg-gray-200 mt-2 w-full"
+          class="bg-white p-1 rounded-xs border mt-1 w-full"
           name="template_name"
           type="text"
           bind:value={contract.templateName}
@@ -113,7 +113,7 @@
       <div class="flex flex-col">
         <label class="font-semibold text-xs">Module *</label>
         <select
-          class="px-4 bg-gray-200 mt-2"
+          class="bg-white p-1 rounded-xs border mt-2 w-full"
           name="module"
           bind:value={contract.module}
         >
@@ -127,7 +127,7 @@
       <div class="flex flex-col">
         <label class="font-semibold text-xs">Branch Id</label>
         <input
-          class="px-4 bg-gray-200 mt-2"
+          class="bg-white p-1 rounded-xs border mt-1 w-full"
           name="branch_id"
           type="number"
           bind:value={contract.branchId}
@@ -137,7 +137,7 @@
       <div class="flex flex-col">
         <label class="font-semibold text-xs">Property Reference</label>
         <input
-          class="px-4 bg-gray-200 mt-2"
+          class="bg-white p-1 rounded-xs border mt-1 w-full"
           name="property_reference"
           type="number"
           bind:value={contract.propertyId}
@@ -147,7 +147,7 @@
       <div class="flex flex-col">
         <label class="font-semibold text-xs">File *</label>
         <select
-          class="px-4 bg-gray-200 mt-2"
+          class="bg-white p-1 rounded-xs border mt-1 w-full"
           name="file"
           on:change={handleFileChange}
           bind:value={contract.zone}
@@ -161,7 +161,7 @@
         <div class="flex flex-col">
           <label class="font-semibold text-xs">Status *</label>
           <select
-            class="px-4 bg-gray-200 mt-2"
+            class="bg-white p-1 rounded-xs border mt-1 w-full"
             name="status"
             bind:value={contract.status}
           >
@@ -177,7 +177,7 @@
         <button
           type="button"
           on:click={cancel}
-          class=" w-24 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4
+          class=" w-24 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-4
               rounded mr-4"
         >
           Cancel

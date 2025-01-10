@@ -67,7 +67,7 @@
       <label class="font-semibold text-xs">Email</label>
       <input
         autocomplete="off"
-        class="px-4 bg-gray-200 mt-2"
+        class="bg-white p-1 rounded-xs border mt-1"
         name="signatory[{index}].email"
         type="text"
         bind:value={signatory.email}
@@ -79,7 +79,7 @@
       <label class="font-semibold text-xs">Name</label>
       <input
         autocomplete="off"
-        class="px-4 bg-gray-200 mt-2"
+        class="bg-white p-1 rounded-xs border mt-1"
         name="signatory[{index}].name"
         type="text"
         bind:value={signatory.name}
