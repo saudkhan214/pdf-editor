@@ -95,7 +95,8 @@ export async function processPdf(
           return noop;
         }
       } else if (object.type === "text") {
-        let { x, y, lines, lineHeight, size, fontFamily, width } = object;
+        let { x, y, lines, lineHeight, size, fontFamily, width, fontColor } =
+          object;
         const height = size * lineHeight * lines.length;
         const font = await fetchFont(fontFamily);
         debugger;
@@ -109,6 +110,7 @@ export async function processPdf(
             height,
             font: font.buffer || fontFamily, // built-in font family
             dy: font.correction(size, lineHeight),
+            fontColor,
           })
         );
         return () =>

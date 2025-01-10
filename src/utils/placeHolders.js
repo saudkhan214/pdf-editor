@@ -7846,10 +7846,13 @@ export let placeHolders = {
   },
 
   GetChilderns(parentkey) {
-    return this.data
-      .filter((a) => a._name === parentkey)
-      .map((a) => a.PlaceHolder)
-      .flat();
+    return (
+      this.data
+        .filter((a) => a._name === parentkey)
+        .map((a) => a.PlaceHolder)
+        .flat()
+        .filter(Boolean) || []
+    );
   },
   InsertEntity(newEntityName) {
     const existingEntity = this.data.find(

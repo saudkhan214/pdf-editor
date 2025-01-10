@@ -14,6 +14,7 @@
   export let x;
   export let y;
   export let fontFamily;
+  export let fontColor;
   export let pageScale = 1;
   const Families = Object.keys(Fonts);
   const dispatch = createEventDispatcher();
@@ -24,6 +25,7 @@
   let _fontWeight = fontWeight;
   let _lineHeight = lineHeight;
   let _fontFamily = fontFamily;
+  let _fontColor = fontColor;
   let dx = 0;
   let dy = 0;
   let operation = "";
@@ -133,6 +135,12 @@
       name: _fontFamily,
     });
   }
+  function onChangeColor(){
+    console.log(_fontColor)
+    dispatch("update", {
+      fontColor: _fontColor,
+    });
+  }
   function render() {
     editable.innerHTML = text;
     // editable.focus();
@@ -223,13 +231,14 @@
 
       <div class="mr-2 flex items-center">
         <img src={`${basePath}font-weight.svg`} class="w-4 mr-2" alt="Font family" />
-        <div class="relative w-32 md:w-40">
           <select bind:value={_fontWeight}>
             <option value="100">Normal</option>
             <option value="600">Bold</option>
             <option value="800">Bolder</option>
           </select>
-        </div>
+      </div>
+      <div class="mr-2 flex items-center">
+        <input type="color" bind:value={_fontColor} on:input={onChangeColor}/>
       </div>
       <div
         on:click={onDelete}
@@ -266,7 +275,7 @@
     spellcheck="false"
     class="outline-none whitespace-no-wrap"
     style="font-size: {_size}px; font-family: '{_fontFamily}', serif;
-    line-height: {_lineHeight}; -webkit-user-select: text;font-weight:{_fontWeight}"
+    line-height: {_lineHeight};color:{_fontColor}; -webkit-user-select: text;font-weight:{_fontWeight}"
   />
 </div>
 

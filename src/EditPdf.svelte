@@ -282,6 +282,8 @@
           )
         : objects
     );
+
+    console.log(allObjects)
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
@@ -488,6 +490,7 @@
                       y={object.y}
                       size={object.size}
                       lineHeight={object.lineHeight}
+                      fontColor={object.fontColor}
                       fontFamily={object.fontFamily}
                       fontWeight={object.fontWeight}
                       pageScale={pagesScale[pIndex]}

@@ -286,6 +286,7 @@
       alert("Some thing went wrong");
     }
   }
+
   function selectPage(index) {
     selectedPageIndex = index;
   }
@@ -297,6 +298,8 @@
           )
         : objects
     );
+
+    console.log(allObjects);
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
@@ -415,10 +418,12 @@
         <option disabled selected>--Select--</option>
         {#if _placeholders.length > 0}
           {#each _placeholders as _placeholder, i (_placeholder)}
-            <option
-              data-obj={JSON.stringify(_placeholder)}
-              value={_placeholder._name}>{_placeholder._name}</option
-            >
+            {#if _placeholder._name}
+              <option
+                data-obj={JSON.stringify(_placeholder)}
+                value={_placeholder._name}>{_placeholder._name}</option
+              >
+            {/if}
           {/each}
         {/if}
       </select>
@@ -518,6 +523,7 @@
                       y={object.y}
                       size={object.size}
                       lineHeight={object.lineHeight}
+                      fontColor={object.fontColor}
                       fontFamily={object.fontFamily}
                       fontWeight={object.fontWeight}
                       pageScale={pagesScale[pIndex]}
