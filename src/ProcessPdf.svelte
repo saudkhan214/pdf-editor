@@ -193,7 +193,7 @@
     >
       <button
         on:click={downloadPdf}
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3
           md:px-4 mr-3 md:mr-4 rounded"
       >
         Download

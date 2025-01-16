@@ -218,7 +218,7 @@
           viewBox="0 0 48 48"
         >
           <path
-            fill="#4caf50"
+            fill="#1f7bc1"
             d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
           ></path><path fill="#fff" d="M21,14h6v20h-6V14z"></path><path
             fill="#fff"
