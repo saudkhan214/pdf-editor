@@ -7842,7 +7842,8 @@ export let placeHolders = {
   ],
 
   get Entities() {
-    return this.data.filter((a) => a._case == "all").map((obj) => obj._name);
+    // return this.data.filter((a) => a._case == "all").map((obj) => obj._name);
+    return this.data.map((obj) => obj._name);
   },
 
   GetChilderns(parentkey) {
