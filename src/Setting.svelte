@@ -1,20 +1,28 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import Signatory from "./Signatory.svelte";
   export var contract = {
     templateName: "",
-    module: "8",
+    module: "",
     branchId: "",
     propertyId: "",
-    zone: "2",
-    status: "512",
+    zone: "",
+    status: "",
   };
   $: contract.module = String(contract.module);
   $: contract.zone = String(contract.zone);
   $: contract.status = String(contract.status);
+  $: contract.branchId = String(contract.branchId);
+  $: contract.propertyId = String(contract.propertyId);
   const dispatch = createEventDispatcher();
 
   let showStatus = true;
+
+  onMount(() => {
+    if (contract.zone != "2") {
+      showStatus = false;
+    }
+  });
   // let signatories = [{}];
   function cancel(e) {
     dispatch("cancel");
@@ -23,7 +31,17 @@
     dispatch("finish", {});
   }
   function handleSubmit(e) {
-    var tag = {};
+    if (
+      contract.templateName == "" ||
+      contract.module == "" ||
+      contract.zone == "" ||
+      (contract.zone == "2" && contract.status == "")
+    ) {
+      alert("Fill the required fields");
+      return;
+    }
+
+    var tag = contract;
     // let signatories = [];
     const formData = new FormData(e.target);
     for (let field of formData) {
@@ -45,40 +63,31 @@
           // // Assign the value to the correct field (email or name) of the corresponding signatory
           // signatories[index][fieldName] = value;
         }
-      } else {
-        // For other non-signatory fields, continue adding them normally to the 'tag' object
-        // if (key == "branch_id" || key == "property_reference") {
-        //   continue;
-        // }
-
-        tag[key] = value;
       }
+      // else {
+      //   // For other non-signatory fields, continue adding them normally to the 'tag' object
+      //   // if (key == "branch_id" || key == "property_reference") {
+      //   //   continue;
+      //   // }
+
+      //   tag[key] = value;
+      // }
     }
 
     // // Add the signatories array to the tag object
     // tag.signatories = signatories;
 
     tag["country"] = getCountryId();
-    var optionalTags = ["branch_id", "property_reference"];
-    const validated = Object.keys(tag)
-      .filter((x) => !optionalTags.includes(x))
-      .some((x) => tag[x] == null || tag[x] == "");
-    // const signatoryValidated = signatories.some((signatory) => {
-    //   return !signatory.email || !signatory.name; // true if any email or name is missing
-    // });
-    if (validated) {
-      alert("Fill the required fields");
-      return;
-    }
     dispatch("finish", tag);
   }
 
   function handleFileChange(e) {
-    if (e.target.value && e.target.value === "2") {
-      showStatus = true;
-    } else {
-      showStatus = false;
-    }
+    contract = {
+      ...contract, // Clone the existing state
+      zone: e.target.value, // Update zone explicitly
+      status: e.target.value === "2" ? contract.status : "", // Clear status only when needed
+    };
+    showStatus = e.target.value === "2";
   }
 
   function getCountryId() {
@@ -107,7 +116,7 @@
         <label class="font-semibold text-xs">Template Name *</label>
         <input
           class="bg-white p-1 rounded-xs border mt-1 w-full"
-          name="template_name"
+          name="templateName"
           type="text"
           bind:value={contract.templateName}
         />
@@ -120,6 +129,7 @@
           name="module"
           bind:value={contract.module}
         >
+          <option selected disabled value="">--Select--</option>
           <option value="8">Property Management</option>
           <option value="2">Rent</option>
           <option value="1">Sale</option>
@@ -131,7 +141,7 @@
         <label class="font-semibold text-xs">Branch Id</label>
         <input
           class="bg-white p-1 rounded-xs border mt-1 w-full"
-          name="branch_id"
+          name="branchId"
           type="number"
           bind:value={contract.branchId}
         />
@@ -141,7 +151,7 @@
         <label class="font-semibold text-xs">Property Reference</label>
         <input
           class="bg-white p-1 rounded-xs border mt-1 w-full"
-          name="property_reference"
+          name="propertyId"
           type="number"
           bind:value={contract.propertyId}
         />
@@ -151,10 +161,11 @@
         <label class="font-semibold text-xs">File *</label>
         <select
           class="bg-white p-1 rounded-xs border mt-1 w-full"
-          name="file"
+          name="zone"
           on:change={handleFileChange}
           bind:value={contract.zone}
         >
+          <option selected disabled>--Select--</option>
           <option value="2">Unit</option>
           <option value="16">Maintenance Contract</option>
         </select>
@@ -168,6 +179,7 @@
             name="status"
             bind:value={contract.status}
           >
+            <option selected disabled>--Select--</option>
             <option value="512">UnPublished</option>
             <option value="1">Vacant</option>
             <option value="256">Blocked</option>

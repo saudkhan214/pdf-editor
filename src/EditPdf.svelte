@@ -17,7 +17,7 @@
     readAsPDF,
     readAsDataURL,
   } from "./utils/asyncReader.js";
-  import { ggID } from "./utils/helper.js";
+  import { ggID, calculateObjectPosition } from "./utils/helper.js";
   import { edit } from "./utils/PDF.js";
   import Setting from "./Setting.svelte";
   import { config } from "./utils/config";
@@ -61,6 +61,7 @@
         pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         pdfName = pdfJsonData.pdfName;
         contractInfo = pdfJsonData.contract;
+        console.log(contractInfo);
         await addPDF(pdfBlob);
 
         await fetchFont(currentFont);
@@ -70,7 +71,7 @@
         window.close();
       }
     } catch (e) {
-      alert(e.message)
+      alert(e.message);
       console.log(e);
     }
   });
@@ -213,8 +214,15 @@
     let selectdPage = await pages[selectedPageIndex];
     const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
     const pageHeight = viewport.height;
-
-    const object = {
+    var objs = allObjects[selectedPageIndex];
+    var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
+    const position = calculateObjectPosition(
+      objs,
+      yAxis,
+      viewport.width,
+      text
+    );
+    let object = {
       id,
       text,
       type: "text",
@@ -223,8 +231,8 @@
       lineHeight: 1.4,
       fontWeight: 100,
       fontFamily: currentFont,
-      x: 0,
-      y: window.scrollY - pageHeight * selectedPageIndex + 45,
+      x: position.x,
+      y: position.y,
     };
     if (dataObj._case == "Signatory") {
       var signatory = signatories.find((a) => a.email == dataObj._datafield);
@@ -234,7 +242,7 @@
       }
     }
     var maxId = allObjects[selectedPageIndex].length;
-    object.id = maxId++;
+    object.id = maxId + 1;
 
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex === selectedPageIndex ? [...objects, object] : objects
@@ -283,7 +291,7 @@
         : objects
     );
 
-    console.log(allObjects)
+    console.log(allObjects);
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>

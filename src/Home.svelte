@@ -16,7 +16,7 @@
     readAsPDF,
     readAsDataURL,
   } from "./utils/asyncReader.js";
-  import { ggID } from "./utils/helper.js";
+  import { ggID, calculateObjectPosition } from "./utils/helper.js";
   import { save } from "./utils/PDF.js";
   import Setting from "./Setting.svelte";
   // import { link } from "svelte-routing";
@@ -134,16 +134,18 @@
   async function onUploadPDF(e) {
     const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
     const file = files[0];
-    if (!file || file.type !== "application/pdf") {
-      alert("Only PDF files are allowed.");
-      return;
-    }
-    selectedPageIndex = -1;
-    try {
-      await addPDF(file);
-      selectedPageIndex = 0;
-    } catch (e) {
-      console.log(e);
+    if (file) {
+      if (file.type !== "application/pdf") {
+        alert("Only PDF files are allowed.");
+        return;
+      }
+      selectedPageIndex = -1;
+      try {
+        await addPDF(file);
+        selectedPageIndex = 0;
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
   async function addPDF(file) {
@@ -217,7 +219,11 @@
     // let isSignatory = dataObj._case == "Signatories" ? true : false;
     // if (e.target.value) {
     // }
-    await addTextField(e.target);
+    if (selectedPageIndex >= 0) {
+      await addTextField(e.target);
+    } else {
+      alert("Please select a page first");
+    }
   }
   async function addTextField(target) {
     const selectedOption = target.selectedOptions[0];
@@ -231,7 +237,15 @@
     let selectdPage = await pages[selectedPageIndex];
     const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
     const pageHeight = viewport.height;
-
+    var objs = allObjects[selectedPageIndex];
+    var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
+    const position = calculateObjectPosition(
+      objs,
+      yAxis,
+      viewport.width,
+      text
+    );
+    console.log(position)
     const object = {
       id,
       text,
@@ -241,8 +255,8 @@
       lineHeight: 1.4,
       fontWeight: 100,
       fontFamily: currentFont,
-      x: 0,
-      y: window.scrollY - pageHeight * selectedPageIndex + 45,
+      x: position.x,
+      y: position.y,
     };
     if (dataObj._case == "Signatory") {
       var signatory = signatories.find((a) => a.email == dataObj._datafield);
@@ -363,7 +377,7 @@
       on:change={onUploadImage}
     />
     <label
-    for="pdf"
+      for="pdf"
       class="whitespace-no-wrap bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 md:px-4 rounded mr-3 cursor-pointer md:mr-4 mt-6"
     >
       Choose PDF
@@ -547,9 +561,7 @@
         {/each}
       </div>
       <div class="w-1/4">
-        <h5
-          class="mb-2 text-2xl font-bold text-gray-900 dark:text-white"
-        >
+        <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
           Signatories
         </h5>
         <div class="grid grid-cols-1 gap-2">
@@ -585,7 +597,9 @@
       </div>
     </div>
   {:else}
-    <div class="w-1/2 flex justify-center items-center border-4 border-dashed border-gray-500 mt-10 py-48">
+    <div
+      class="w-1/2 flex justify-center items-center border-4 border-dashed border-gray-500 mt-10 py-48"
+    >
       <span class=" font-bold text-3xl text-gray-500">Drag something here</span>
     </div>
   {/if}
