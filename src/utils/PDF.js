@@ -2,6 +2,7 @@ import { readAsArrayBuffer } from "./asyncReader.js";
 import { fetchFont, getAsset } from "./prepareAssets";
 import { noop } from "./helper.js";
 import { config } from "./config.js";
+const basePath = process.env.BASE_PATH;
 
 export async function save(pdfFile, objects, tags, entityName) {
   var data = new FormData();
@@ -94,12 +95,47 @@ export async function processPdf(
           console.log("Failed to embed image.", e);
           return noop;
         }
+      } else if (object.type === "checkbox") {
+        let { x, y, width, height, checked } = object;
+        const pngUrl = checked
+          ? "checkbox_checked.png"
+          : "checkbox_unchecked.png";
+        const imageBytes = await fetch(basePath + pngUrl).then((res) =>
+          res.arrayBuffer()
+        );
+
+        const pngImage = await pdfDoc.embedPng(imageBytes);
+        return () => {
+          page.drawImage(pngImage, {
+            x,
+            y: pageHeight - y - height - 5,
+            width: width,
+            height: height,
+          });
+          // const svgPath = checked
+          //   ? "M4,4 H20 V20 H4 Z M6,12 L10,16 L18,8"
+          //   : "M4,4 H20 V20 H4 Z";
+
+          // page.drawSvgPath(svgPath, {
+          //   x,
+          //   y: pageHeight - y - height,
+          //   borderColor: PDFLib.rgb(0, 0, 0),
+          //   borderWidth: 2,
+          // });
+
+          // page.drawRectangle({
+          //   x,
+          //   y: pageHeight - y - height,
+          //   width,
+          //   height,
+          //   color: checked ? PDFLib.rgb(0, 0, 0) : PDFLib.rgb(1, 1, 1),
+          // });
+        };
       } else if (object.type === "text") {
         let { x, y, lines, lineHeight, size, fontFamily, width, fontColor } =
           object;
-        const height = size * lineHeight * lines.length;
+        const height = size * lineHeight * (lines ? lines.length : 1);
         const font = await fetchFont(fontFamily);
-        debugger;
         width = getTextWidth(lines, width) + 5;
         const [textPage] = await pdfDoc.embedPdf(
           await makeTextPDF({

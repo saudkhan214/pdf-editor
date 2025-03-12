@@ -14,9 +14,9 @@ export function calculateObjectPosition(objects, yAxis, pageWidth, text) {
       curr.x > prev.x ? curr : prev
     );
 
-    var accupiedWidth = getTextWidth([maxXPosition.text], 0);
+    var accupiedWidth = getTextWidth([maxXPosition.text || ""], 0);
     var restSpace = pageWidth - maxXPosition.x - accupiedWidth;
-    var textWidth = getTextWidth([text], 0);
+    var textWidth = getTextWidth([text || ""], 0);
     if (textWidth < restSpace) {
       return { x: accupiedWidth + maxXPosition.x + 30, y: yAxis };
     } else {

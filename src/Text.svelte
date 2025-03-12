@@ -36,16 +36,22 @@
   }
 
   function handlePanEnd(event) {
+    console.log("enter handlePanEnd");
     if (dx === 0 && dy === 0) {
       return editable.focus();
     }
     dispatch("update", {
       x: x + dx,
       y: y + dy,
+      lines: extractLines(),
+      width: editable.clientWidth,
+      text: editable.textContent,
     });
     dx = 0;
     dy = 0;
     operation = "";
+
+    console.log("end handlePanEnd");
   }
   function handlePanStart(event) {
     startX = event.detail.x;
@@ -62,6 +68,7 @@
     dispatch("update", {
       lines: extractLines(),
       width: editable.clientWidth,
+      text: editable.textContent,
     });
     operation = "";
   }
@@ -135,8 +142,7 @@
       name: _fontFamily,
     });
   }
-  function onChangeColor(){
-    console.log(_fontColor)
+  function onChangeColor() {
     dispatch("update", {
       fontColor: _fontColor,
     });
@@ -178,7 +184,11 @@
       border-gray-400"
     >
       <div class="mr-2 flex items-center">
-        <img src={`${basePath}line_height.svg`} class="w-6 mr-2" alt="Line height" />
+        <img
+          src={`${basePath}line_height.svg`}
+          class="w-6 mr-2"
+          alt="Line height"
+        />
         <input
           type="number"
           min="1"
@@ -200,7 +210,11 @@
         />
       </div>
       <div class="mr-2 flex items-center">
-        <img src={`${basePath}text-family.svg`} class="w-4 mr-2" alt="Font family" />
+        <img
+          src={`${basePath}text-family.svg`}
+          class="w-4 mr-2"
+          alt="Font family"
+        />
         <div class="relative w-32 md:w-40">
           <select
             bind:value={_fontFamily}
@@ -230,21 +244,29 @@
       </div>
 
       <div class="mr-2 flex items-center">
-        <img src={`${basePath}font-weight.svg`} class="w-4 mr-2" alt="Font family" />
-          <select bind:value={_fontWeight}>
-            <option value="100">Normal</option>
-            <option value="600">Bold</option>
-            <option value="800">Bolder</option>
-          </select>
+        <img
+          src={`${basePath}font-weight.svg`}
+          class="w-4 mr-2"
+          alt="Font family"
+        />
+        <select bind:value={_fontWeight}>
+          <option value="100">Normal</option>
+          <option value="600">Bold</option>
+          <option value="800">Bolder</option>
+        </select>
       </div>
       <div class="mr-2 flex items-center">
-        <input type="color" bind:value={_fontColor} on:input={onChangeColor}/>
+        <input type="color" bind:value={_fontColor} on:input={onChangeColor} />
       </div>
       <div
         on:click={onDelete}
         class="w-5 h-5 rounded-full bg-white cursor-pointer"
       >
-        <img class="w-full h-full" src={`${basePath}delete.svg`} alt="delete object" />
+        <img
+          class="w-full h-full"
+          src={`${basePath}delete.svg`}
+          alt="delete object"
+        />
       </div>
     </div>
   </Toolbar>

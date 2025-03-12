@@ -8,19 +8,18 @@
   import Signatory from "./Signatory.svelte";
   import Drawing from "./Drawing.svelte";
   import DrawingCanvas from "./DrawingCanvas.svelte";
+  import Checkbox from "./Checkbox.svelte";
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
-  // import { config } from "./utils/config";
   import { placeHolders } from "./utils/placeHolders";
-  import {
-    readAsImage,
-    readAsPDF,
-    readAsDataURL,
-  } from "./utils/asyncReader.js";
-  import { ggID, calculateObjectPosition } from "./utils/helper.js";
   import { save } from "./utils/PDF.js";
   import Setting from "./Setting.svelte";
-  // import { link } from "svelte-routing";
-  const genID = ggID();
+  import {
+    addCheckbox,
+    addTextField,
+    addDrawing,
+    addPDF,
+    addImage,
+  } from "./utils/sharedFunctions.js";
   let pdfFile;
   let pdfName = "";
   let selectedEntity;
@@ -30,77 +29,24 @@
   let signatories = [{}];
   let _placeholders = [];
   let currentFont = "Times-Roman";
-  let focusId = null;
   let selectedPageIndex = -1;
   let saving = false;
   let openSaveDialogue = false;
   let addingDrawing = false;
-  // let processingDone = false;
-  // var pdfBlob;
   var _win;
   placeHolders.InsertEntity("Signatories");
   // for test purpose
   onMount(async () => {
     try {
-      // const urlParams = new URLSearchParams(window.location.search);
-      // const isProcessingMode = urlParams.get("processing") != null;
-      // const resource_id = urlParams.get("resource_id");
-      // const entity_id = urlParams.get("entity_id");
-      // const entity_name = urlParams.get("entity_name");
-      // if (isProcessingMode && resource_id) {
-      //   var pdfJsonData = await fetchPdfResource(
-      //     resource_id,
-      //     entity_id,
-      //     entity_name
-      //   );
-      //   const metaData = JSON.parse(pdfJsonData.metadata).map(
-      //     (a) => a.filter((x) => x.type != "signatory") //ignore the signatory fields to be process
-      //   );
-      //   allObjects = metaData;
-      //   const base64Pdf = pdfJsonData.pdf;
-      //   const byteCharacters = atob(base64Pdf);
-      //   const byteNumbers = new Array(byteCharacters.length)
-      //     .fill(0)
-      //     .map((_, i) => byteCharacters.charCodeAt(i));
-      //   const byteArray = new Uint8Array(byteNumbers);
-      //   pdfBlob = new Blob([byteArray], { type: "application/pdf" });
-      //   pdfName = pdfJsonData.pdfName;
-      //   await addPDF(pdfBlob);
-      // }
-      //const res = await fetch("/ejari_unified_tenancy_contract.pdf");
-      //const pdfBlob = await res.blob();
-
       selectedPageIndex = 0;
       setTimeout(async () => {
         await fetchFont(currentFont);
         prepareAssets();
-        // if (isProcessingMode) {
-        //   // Create a 'mousedown' event
-        //   const mouseDownEvent = new MouseEvent("mousedown", {
-        //     bubbles: true, // Ensures the event propagates up the DOM
-        //     cancelable: true,
-        //     view: window,
-        //   });
-
-        //   // Dispatch the event on the div element
-        //   _win.dispatchEvent(mouseDownEvent);
-        //   await process(pdfFile, allObjects, pdfName, entity_id, entity_name);
-        //   processingDone = true;
-        // }
       }, 2000);
     } catch (e) {
       console.log(e);
     }
   });
-  // async function fetchPdfResource(id, entity_id, entity_name) {
-  //   var res = await fetch(
-  //     `${config.API_HOST}/contract/get-pdf?resource_id=${id}&entity_name=${entity_name}&entity_id=${entity_id}`,
-  //     {
-  //       method: "GET",
-  //     }
-  //   );
-  //   return await res.json();
-  // }
   function addSignatory() {
     for (let i = 0; i < signatories.length; i++) {
       let signatory = signatories[i];
@@ -141,71 +87,29 @@
       }
       selectedPageIndex = -1;
       try {
-        await addPDF(file);
+        ({ pages, allObjects, pdfName, pdfFile, pagesScale } = await addPDF(
+          file,
+          pages,
+          allObjects,
+          pdfName,
+          pdfFile,
+          pagesScale
+        ));
         selectedPageIndex = 0;
       } catch (e) {
         console.log(e);
       }
     }
   }
-  async function addPDF(file) {
-    try {
-      const pdf = await readAsPDF(file);
-      if (file.name) {
-        pdfName = file.name;
-      }
-      pdfFile = file;
-      const numPages = pdf.numPages;
-      pages = Array(numPages)
-        .fill()
-        .map((_, i) => pdf.getPage(i + 1));
-      allObjects =
-        Array.isArray(allObjects) && allObjects.some((obj) => obj)
-          ? allObjects
-          : pages.map(() => []);
 
-      pagesScale = Array(numPages).fill(1);
-    } catch (e) {
-      console.log("Failed to add pdf.");
-      throw e;
-    }
-  }
   async function onUploadImage(e) {
     const file = e.target.files[0];
     if (file && selectedPageIndex >= 0) {
-      addImage(file);
+      addImage(file, allObjects, selectedPageIndex);
     }
     e.target.value = null;
   }
-  async function addImage(file) {
-    try {
-      // get dataURL to prevent canvas from tainted
-      const url = await readAsDataURL(file);
-      const img = await readAsImage(url);
-      const id = genID();
-      const { width, height } = img;
-      const object = {
-        id,
-        type: "image",
-        width,
-        height,
-        x: 0,
-        y: 0,
-        payload: img,
-        file,
-      };
-      allObjects = allObjects.map((objects, pIndex) =>
-        pIndex === selectedPageIndex ? [...objects, object] : objects
-      );
-    } catch (e) {
-      console.log(`Fail to add image.`, e);
-    }
-  }
-  function onAddTextField() {
-    if (selectedPageIndex >= 0) {
-      addTextField();
-    }
-  }
+
   function entityChange(e) {
     if (e.target.value) {
       _placeholders = placeHolders.GetChilderns(e.target.value);
@@ -213,84 +117,36 @@
     }
   }
   async function placeHolderChange(e) {
-    // const selectedOption = e.target.selectedOptions[0];
-    // const dataObj = JSON.parse(selectedOption.dataset.obj);
-
-    // let isSignatory = dataObj._case == "Signatories" ? true : false;
-    // if (e.target.value) {
-    // }
     if (selectedPageIndex >= 0) {
-      await addTextField(e.target);
+      if (e.target.value === "Checkbox") {
+        ({ pages, allObjects } = await addCheckbox(
+          e.target,
+          pages,
+          selectedPageIndex,
+          allObjects
+        ));
+      } else {
+        ({ pages, allObjects } = await addTextField(
+          e.target,
+          pages,
+          selectedPageIndex,
+          allObjects,
+          signatories,
+          currentFont
+        ));
+      }
+      e.target.value = "";
     } else {
       alert("Please select a page first");
     }
   }
-  async function addTextField(target) {
-    const selectedOption = target.selectedOptions[0];
-    const dataObj = JSON.parse(selectedOption.dataset.obj);
 
-    let text = target.value;
-    text = `[${text}]`;
-    const id = genID();
-    await fetchFont(currentFont);
-
-    let selectdPage = await pages[selectedPageIndex];
-    const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
-    const pageHeight = viewport.height;
-    var objs = allObjects[selectedPageIndex];
-    var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
-    const position = calculateObjectPosition(
-      objs,
-      yAxis,
-      viewport.width,
-      text
-    );
-    console.log(position)
-    const object = {
-      id,
-      text,
-      type: "text",
-      size: 16,
-      width: 0, // recalculate after editing
-      lineHeight: 1.4,
-      fontWeight: 100,
-      fontFamily: currentFont,
-      x: position.x,
-      y: position.y,
-    };
-    if (dataObj._case == "Signatory") {
-      var signatory = signatories.find((a) => a.email == dataObj._datafield);
-      if (signatory) {
-        object.type = "signatory";
-        object.signatory = signatory;
-      }
-    }
-    allObjects = allObjects.map((objects, pIndex) =>
-      pIndex === selectedPageIndex ? [...objects, object] : objects
-    );
-  }
   function onAddDrawing() {
     if (selectedPageIndex >= 0) {
       addingDrawing = true;
     }
   }
-  function addDrawing(originWidth, originHeight, path, scale = 1) {
-    const id = genID();
-    const object = {
-      id,
-      path,
-      type: "drawing",
-      x: 0,
-      y: 0,
-      originWidth,
-      originHeight,
-      width: originWidth * scale,
-      scale,
-    };
-    allObjects = allObjects.map((objects, pIndex) =>
-      pIndex === selectedPageIndex ? [...objects, object] : objects
-    );
-  }
+
   async function selectFontFamily(event) {
     const name = event.detail.name;
     try {
@@ -465,7 +321,14 @@
           if (originWidth > 500) {
             scale = 500 / originWidth;
           }
-          addDrawing(originWidth, originHeight, path, scale);
+          addDrawing(
+            allObjects,
+            selectedPageIndex,
+            originWidth,
+            originHeight,
+            path,
+            scale
+          );
           addingDrawing = false;
         }}
         on:cancel={() => (addingDrawing = false)}
@@ -540,6 +403,15 @@
                       fontFamily={object.fontFamily}
                       fontWeight={object.fontWeight}
                       pageScale={pagesScale[pIndex]}
+                    />
+                  {:else if object.type === "checkbox"}
+                    <Checkbox
+                      on:update={(e) => updateObject(object.id, e.detail)}
+                      on:delete={() => deleteObject(object.id)}
+                      x={object.x}
+                      y={object.y}
+                      pageScale={pagesScale[pIndex]}
+                      isChecked={object.checked}
                     />
                   {:else if object.type === "drawing"}
                     <Drawing

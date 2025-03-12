@@ -5,14 +5,9 @@
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
   import PDFPage from "./PDFPage.svelte";
   import Text from "./Text.svelte";
+  import Checkbox from "./Checkbox.svelte";
   import Tailwind from "./Tailwind.svelte";
-  import {
-    readAsArrayBuffer,
-    readAsImage,
-    readAsPDF,
-    readAsDataURL,
-  } from "./utils/asyncReader.js";
-
+  import { addPDF } from "./utils/sharedFunctions.js";
   let processingDone = false;
   let allObjects = [];
   let pagesScale = [];
@@ -52,7 +47,14 @@
         const byteArray = new Uint8Array(byteNumbers);
         pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         pdfName = pdfJsonData.pdfName;
-        await addPDF(pdfBlob);
+        ({ pages, allObjects, pdfName, pdfFile, pagesScale } = await addPDF(
+          pdfBlob,
+          pages,
+          allObjects,
+          pdfName,
+          pdfFile,
+          pagesScale
+        ));
 
         await fetchFont(currentFont);
         prepareAssets();
@@ -94,28 +96,28 @@
     );
     return await res.json();
   }
-  async function addPDF(file) {
-    try {
-      const pdf = await readAsPDF(file);
-      if (file.name) {
-        pdfName = file.name;
-      }
-      pdfFile = file;
-      const numPages = pdf.numPages;
-      pages = Array(numPages)
-        .fill()
-        .map((_, i) => pdf.getPage(i + 1));
-      allObjects =
-        Array.isArray(allObjects) && allObjects.some((obj) => obj)
-          ? allObjects
-          : pages.map(() => []);
+  // async function addPDF(file) {
+  //   try {
+  //     const pdf = await readAsPDF(file);
+  //     if (file.name) {
+  //       pdfName = file.name;
+  //     }
+  //     pdfFile = file;
+  //     const numPages = pdf.numPages;
+  //     pages = Array(numPages)
+  //       .fill()
+  //       .map((_, i) => pdf.getPage(i + 1));
+  //     allObjects =
+  //       Array.isArray(allObjects) && allObjects.some((obj) => obj)
+  //         ? allObjects
+  //         : pages.map(() => []);
 
-      //   pagesScale = Array(numPages).fill(1);
-    } catch (e) {
-      console.log("Failed to add pdf.");
-      throw e;
-    }
-  }
+  //     //   pagesScale = Array(numPages).fill(1);
+  //   } catch (e) {
+  //     console.log("Failed to add pdf.");
+  //     throw e;
+  //   }
+  // }
 
   function selectPage(index) {
     selectedPageIndex = index;
@@ -240,6 +242,15 @@
                         fontFamily={object.fontFamily}
                         fontWeight={object.fontWeight}
                         pageScale={pagesScale[pIndex]}
+                      />
+                    {:else if object.type === "checkbox"}
+                      <Checkbox
+                        on:update={(e) => updateObject(object.id, e.detail)}
+                        on:delete={() => deleteObject(object.id)}
+                        x={object.x}
+                        y={object.y}
+                        pageScale={pagesScale[pIndex]}
+                        isChecked={object.checked}
                       />
                     {:else if object.type === "drawing"}
                       <div></div>

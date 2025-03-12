@@ -6,25 +6,23 @@
   import PDFPage from "./PDFPage.svelte";
   import Image from "./Image.svelte";
   import Text from "./Text.svelte";
+  import Checkbox from "./Checkbox.svelte";
   import Signatory from "./Signatory.svelte";
   import Drawing from "./Drawing.svelte";
   import DrawingCanvas from "./DrawingCanvas.svelte";
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
-  // import { config } from "./utils/config";
   import { placeHolders } from "./utils/placeHolders";
   import {
-    readAsImage,
-    readAsPDF,
-    readAsDataURL,
-  } from "./utils/asyncReader.js";
-  import { ggID, calculateObjectPosition } from "./utils/helper.js";
+    addTextField,
+    addDrawing,
+    addPDF,
+    addImage,
+  } from "./utils/sharedFunctions.js";
   import { edit } from "./utils/PDF.js";
   import Setting from "./Setting.svelte";
   import { config } from "./utils/config";
-
   export let resource_id;
 
-  const genID = ggID();
   let pdfFile;
   let pdfName = "";
   let pages = [];
@@ -33,7 +31,6 @@
   let signatories = [{}];
   let _placeholders = [];
   let currentFont = "Times-Roman";
-  let focusId = null;
   let contractInfo = null;
   let selectedPageIndex = -1;
   let saving = false;
@@ -62,8 +59,15 @@
         pdfName = pdfJsonData.pdfName;
         contractInfo = pdfJsonData.contract;
         console.log(contractInfo);
-        await addPDF(pdfBlob);
-
+        // await addPDF(pdfBlob, pages, allObjects, pdfName, pdfFile, pagesScale);
+        ({ pages, allObjects, pdfName, pdfFile, pagesScale } = await addPDF(
+          pdfBlob,
+          pages,
+          allObjects,
+          pdfName,
+          pdfFile,
+          pagesScale
+        ));
         await fetchFont(currentFont);
         prepareAssets();
       } else {
@@ -120,70 +124,73 @@
     if (!file || file.type !== "application/pdf") return;
     selectedPageIndex = -1;
     try {
-      await addPDF(file);
+      // await addPDF(file, allObjects, pdfName, pdfFile, pagesScale);
+      ({ pages, allObjects, pdfName, pdfFile, pagesScale } = await addPDF(
+        file,
+        pages,
+        allObjects,
+        pdfName,
+        pdfFile,
+        pagesScale
+      ));
       selectedPageIndex = 0;
     } catch (e) {
       console.log(e);
     }
   }
-  async function addPDF(file) {
-    try {
-      const pdf = await readAsPDF(file);
-      if (file.name) {
-        pdfName = file.name;
-      }
-      pdfFile = file;
-      const numPages = pdf.numPages;
-      pages = Array(numPages)
-        .fill()
-        .map((_, i) => pdf.getPage(i + 1));
-      allObjects =
-        Array.isArray(allObjects) && allObjects.some((obj) => obj)
-          ? allObjects
-          : pages.map(() => []);
+  // async function addPDF(file) {
+  //   try {
+  //     const pdf = await readAsPDF(file);
+  //     if (file.name) {
+  //       pdfName = file.name;
+  //     }
+  //     pdfFile = file;
+  //     const numPages = pdf.numPages;
+  //     pages = Array(numPages)
+  //       .fill()
+  //       .map((_, i) => pdf.getPage(i + 1));
+  //     allObjects =
+  //       Array.isArray(allObjects) && allObjects.some((obj) => obj)
+  //         ? allObjects
+  //         : pages.map(() => []);
 
-      pagesScale = Array(numPages).fill(1);
-    } catch (e) {
-      console.log("Failed to add pdf.");
-      throw e;
-    }
-  }
+  //     pagesScale = Array(numPages).fill(1);
+  //   } catch (e) {
+  //     console.log("Failed to add pdf.");
+  //     throw e;
+  //   }
+  // }
   async function onUploadImage(e) {
     const file = e.target.files[0];
     if (file && selectedPageIndex >= 0) {
-      addImage(file);
+      addImage(file, allObjects, selectedPageIndex);
     }
     e.target.value = null;
   }
-  async function addImage(file) {
-    try {
-      // get dataURL to prevent canvas from tainted
-      const url = await readAsDataURL(file);
-      const img = await readAsImage(url);
-      const id = genID();
-      const { width, height } = img;
-      const object = {
-        id,
-        type: "image",
-        width,
-        height,
-        x: 0,
-        y: 0,
-        payload: img,
-        file,
-      };
-      allObjects = allObjects.map((objects, pIndex) =>
-        pIndex === selectedPageIndex ? [...objects, object] : objects
-      );
-    } catch (e) {
-      console.log(`Fail to add image.`, e);
-    }
-  }
-  function onAddTextField() {
-    if (selectedPageIndex >= 0) {
-      addTextField();
-    }
-  }
+  // async function addImage(file) {
+  //   try {
+  //     // get dataURL to prevent canvas from tainted
+  //     const url = await readAsDataURL(file);
+  //     const img = await readAsImage(url);
+  //     const id = genID();
+  //     const { width, height } = img;
+  //     const object = {
+  //       id,
+  //       type: "image",
+  //       width,
+  //       height,
+  //       x: 0,
+  //       y: 0,
+  //       payload: img,
+  //       file,
+  //     };
+  //     allObjects = allObjects.map((objects, pIndex) =>
+  //       pIndex === selectedPageIndex ? [...objects, object] : objects
+  //     );
+  //   } catch (e) {
+  //     console.log(`Fail to add image.`, e);
+  //   }
+  // }
   function entityChange(e) {
     if (e.target.value) {
       _placeholders = placeHolders.GetChilderns(e.target.value);
@@ -197,79 +204,82 @@
     // if (e.target.value) {
     // }
     if (selectedPageIndex >= 0) {
-      await addTextField(e.target);
+      ({ pages, allObjects } = await addTextField(
+        e.target,
+        pages,
+        selectedPageIndex,
+        allObjects,
+        signatories,
+        currentFont
+      ));
+      e.target.value = "";
     } else {
       alert("Please select a page first");
     }
   }
-  async function addTextField(target) {
-    const selectedOption = target.selectedOptions[0];
-    const dataObj = JSON.parse(selectedOption.dataset.obj);
+  // async function addTextField(target) {
+  //   const selectedOption = target.selectedOptions[0];
+  //   const dataObj = JSON.parse(selectedOption.dataset.obj);
 
-    let text = target.value;
-    text = `[${text}]`;
-    const id = genID();
-    await fetchFont(currentFont);
+  //   let text = target.value;
+  //   text = `[${text}]`;
+  //   const id = genID();
+  //   await fetchFont(currentFont);
 
-    let selectdPage = await pages[selectedPageIndex];
-    const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
-    const pageHeight = viewport.height;
-    var objs = allObjects[selectedPageIndex];
-    var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
-    const position = calculateObjectPosition(
-      objs,
-      yAxis,
-      viewport.width,
-      text
-    );
-    let object = {
-      id,
-      text,
-      type: "text",
-      size: 16,
-      width: 0, // recalculate after editing
-      lineHeight: 1.4,
-      fontWeight: 100,
-      fontFamily: currentFont,
-      x: position.x,
-      y: position.y,
-    };
-    if (dataObj._case == "Signatory") {
-      var signatory = signatories.find((a) => a.email == dataObj._datafield);
-      if (signatory) {
-        object.type = "signatory";
-        object.signatory = signatory;
-      }
-    }
-    var maxId = allObjects[selectedPageIndex].length;
-    object.id = maxId + 1;
+  //   let selectdPage = await pages[selectedPageIndex];
+  //   const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
+  //   const pageHeight = viewport.height;
+  //   var objs = allObjects[selectedPageIndex];
+  //   var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
+  //   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
+  //   let object = {
+  //     id,
+  //     text,
+  //     type: "text",
+  //     size: 16,
+  //     width: 0, // recalculate after editing
+  //     lineHeight: 1.4,
+  //     fontWeight: 100,
+  //     fontFamily: currentFont,
+  //     x: position.x,
+  //     y: position.y,
+  //   };
+  //   if (dataObj._case == "Signatory") {
+  //     var signatory = signatories.find((a) => a.email == dataObj._datafield);
+  //     if (signatory) {
+  //       object.type = "signatory";
+  //       object.signatory = signatory;
+  //     }
+  //   }
+  //   var maxId = allObjects[selectedPageIndex].length;
+  //   object.id = maxId + 1;
 
-    allObjects = allObjects.map((objects, pIndex) =>
-      pIndex === selectedPageIndex ? [...objects, object] : objects
-    );
-  }
+  //   allObjects = allObjects.map((objects, pIndex) =>
+  //     pIndex === selectedPageIndex ? [...objects, object] : objects
+  //   );
+  // }
   function onAddDrawing() {
     if (selectedPageIndex >= 0) {
       addingDrawing = true;
     }
   }
-  function addDrawing(originWidth, originHeight, path, scale = 1) {
-    const id = genID();
-    const object = {
-      id,
-      path,
-      type: "drawing",
-      x: 0,
-      y: 0,
-      originWidth,
-      originHeight,
-      width: originWidth * scale,
-      scale,
-    };
-    allObjects = allObjects.map((objects, pIndex) =>
-      pIndex === selectedPageIndex ? [...objects, object] : objects
-    );
-  }
+  // function addDrawing(originWidth, originHeight, path, scale = 1) {
+  //   const id = genID();
+  //   const object = {
+  //     id,
+  //     path,
+  //     type: "drawing",
+  //     x: 0,
+  //     y: 0,
+  //     originWidth,
+  //     originHeight,
+  //     width: originWidth * scale,
+  //     scale,
+  //   };
+  //   allObjects = allObjects.map((objects, pIndex) =>
+  //     pIndex === selectedPageIndex ? [...objects, object] : objects
+  //   );
+  // }
   async function selectFontFamily(event) {
     const name = event.detail.name;
     try {
@@ -426,7 +436,14 @@
           if (originWidth > 500) {
             scale = 500 / originWidth;
           }
-          addDrawing(originWidth, originHeight, path, scale);
+          addDrawing(
+            allObjects,
+            selectedPageIndex,
+            originWidth,
+            originHeight,
+            path,
+            scale
+          );
           addingDrawing = false;
         }}
         on:cancel={() => (addingDrawing = false)}
@@ -502,6 +519,15 @@
                       fontFamily={object.fontFamily}
                       fontWeight={object.fontWeight}
                       pageScale={pagesScale[pIndex]}
+                    />
+                  {:else if object.type === "checkbox"}
+                    <Checkbox
+                      on:update={(e) => updateObject(object.id, e.detail)}
+                      on:delete={() => deleteObject(object.id)}
+                      x={object.x}
+                      y={object.y}
+                      pageScale={pagesScale[pIndex]}
+                      isChecked={object.checked}
                     />
                   {:else if object.type === "drawing"}
                     <Drawing

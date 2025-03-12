@@ -7839,6 +7839,22 @@ export let placeHolders = {
       _name: "Authorizer",
       _case: "Contract",
     },
+    {
+      PlaceHolder: [
+        {
+          _name: "Textbox",
+          _datafield: "Textbox",
+          _case: "Additional",
+        },
+        {
+          _name: "Checkbox",
+          _datafield: "Checkbox",
+          _case: "Additional",
+        },
+      ],
+      _name: "Additionals",
+      _case: "Additional",
+    },
   ],
 
   get Entities() {
