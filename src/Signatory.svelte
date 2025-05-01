@@ -22,6 +22,9 @@
     showOptions = !showOptions;
   }
 
+  function handleInputBlur() {
+    handleInputChange(activeInput); // Dispatch the input change event
+  }
   // Select an option and set it to the active input field
   function selectOption(option) {
     signatory[activeInput] = option; // Set the selected option for the active input
@@ -33,17 +36,17 @@
   // Filter options based on input value (common for both input fields)
   function filterOptions() {
     const currentInputValue = signatory[activeInput];
-    // if (currentInputValue == undefined) {
-    //   return;
-    // }
+    if (currentInputValue == undefined) {
+      return;
+    }
 
-    // if (currentInputValue.trim() === "") {
-    //   filteredOptions = _placeholders;
-    // } else {
-    //   filteredOptions = _placeholders.filter((option) =>
-    //     option._name.toLowerCase().includes(currentInputValue.toLowerCase())
-    //   );
-    // }
+    if (currentInputValue.trim() === "") {
+      filteredOptions = _placeholders;
+    } else {
+      filteredOptions = _placeholders.filter((option) =>
+        option._name.toLowerCase().includes(currentInputValue.toLowerCase())
+      );
+    }
   }
 
   // Watch for changes in the active input value to filter options
@@ -71,6 +74,7 @@
         name="signatory[{index}].email"
         type="text"
         bind:value={signatory.email}
+        on:blur={() => handleInputBlur()}
         on:click={() => toggleOptions("email")}
       />
     </div>

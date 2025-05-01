@@ -14,6 +14,7 @@ export async function addTextField(
   const selectedOption = target.selectedOptions[0];
   const dataObj = JSON.parse(selectedOption.dataset.obj);
 
+  console.log("target", target);
   let text = target.value;
   text = text === "Textbox" ? text : `[${text}]`;
   const id = genID();

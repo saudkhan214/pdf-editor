@@ -42,7 +42,7 @@
     }
 
     var tag = contract;
-    // let signatories = [];
+    let signatories = [];
     const formData = new FormData(e.target);
     for (let field of formData) {
       const [key, value] = field;
@@ -55,13 +55,13 @@
           const index = match[1]; // The signatory index
           const fieldName = match[2]; // The field name (email or name)
 
-          // // Ensure there's an object for this signatory
-          // if (!signatories[index]) {
-          //   signatories[index] = {};
-          // }
+          // Ensure there's an object for this signatory
+          if (!signatories[index]) {
+            signatories[index] = {};
+          }
 
-          // // Assign the value to the correct field (email or name) of the corresponding signatory
-          // signatories[index][fieldName] = value;
+          // Assign the value to the correct field (email or name) of the corresponding signatory
+          signatories[index][fieldName] = value;
         }
       }
       // else {
@@ -74,8 +74,8 @@
       // }
     }
 
-    // // Add the signatories array to the tag object
-    // tag.signatories = signatories;
+    // Add the signatories array to the tag object
+    tag.signatories = signatories;
 
     tag["country"] = getCountryId();
     dispatch("finish", tag);

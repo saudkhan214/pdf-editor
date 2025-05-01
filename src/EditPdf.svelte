@@ -48,7 +48,7 @@
         // const metaData = JSON.parse(pdfJsonData.metadata).map(
         //   (a) => a.filter((x) => x.type != "signatory") //ignore the signatory fields to be process
         // );
-        allObjects = JSON.parse(pdfJsonData.metadata);
+        allObjects = JSON.parse(pdfJsonData.jsonMetadata);
         const base64Pdf = pdfJsonData.pdf;
         const byteCharacters = atob(base64Pdf);
         const byteNumbers = new Array(byteCharacters.length)
@@ -406,7 +406,7 @@
           {#each _placeholders as _placeholder, i (_placeholder)}
             <option
               data-obj={JSON.stringify(_placeholder)}
-              value={_placeholder._datafield}>{_placeholder._name}</option
+              value={_placeholder._name}>{_placeholder._name}</option
             >
           {/each}
         {/if}
