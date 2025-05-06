@@ -119,9 +119,13 @@
 
   async function downloadPdf() {
     pdfProcessing = true;
+    const metaData = allObjects.map(
+      (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
+    );
+    console.log(metaData);
     await processPdf(
       pdfFile,
-      allObjects,
+      metaData,
       "Contract.pdf",
       entity_id,
       entity_name,
@@ -131,15 +135,19 @@
   }
   async function sendForSignature() {
     pdfProcessing = true;
-    await processPdf(
-      pdfFile,
-      allObjects,
-      `${resource_id}.pdf`,
-      entity_id,
-      entity_name,
-      true
+    const metaData = allObjects.map(
+      (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
     );
-    setTimeout(() => {
+    try {
+      await processPdf(
+        pdfFile,
+        metaData,
+        `${resource_id}.pdf`,
+        entity_id,
+        entity_name,
+        true
+      );
+
       const baseUrl = `${config.API_HOST}/signpdf/${selectedSignatureProvider}`;
       const params = new URLSearchParams({
         resource_id,
@@ -151,12 +159,36 @@
 
       const fullUrl = `${baseUrl}?${params.toString()}`;
       console.log("fullUrl", fullUrl);
-      docSignWindow = window.open(
-        fullUrl,
-        "PDF Signature",
-        "width=400,height=600"
-      );
-    }, 3000);
+
+      var res = await fetch(fullUrl, {
+        method: "GET",
+      });
+      var data = await res.json();
+      console.log("data", data);
+      if (data.status == true) {
+        if (data.redirect) {
+          docSignWindow = window.open(
+            data.redirect,
+            "PDF Signature",
+            "width=400,height=600"
+          );
+          if (docSignWindow) {
+            docSignWindow.focus();
+          } else {
+            alert("Please allow popups for this website.");
+          }
+        } else {
+          alert(data.message);
+        }
+      } else {
+        alert(data.message);
+      }
+    } catch (e) {
+      console.log(e);
+      alert("Some thing went wrong");
+    } finally {
+      pdfProcessing = false;
+    }
   }
 
   function handleMessage(event) {

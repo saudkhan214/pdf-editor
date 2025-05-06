@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher, onMount } from "svelte";
-  import Signatory from "./Signatory.svelte";
+  import { config } from "./utils/config.js";
   export var contract = {
     templateName: "",
     module: "",
@@ -14,11 +14,30 @@
   $: contract.status = String(contract.status);
   $: contract.branchId = String(contract.branchId);
   $: contract.propertyId = String(contract.propertyId);
+  console.log("contract", contract);
   const dispatch = createEventDispatcher();
 
+  let branches = [];
   let showStatus = true;
 
   onMount(() => {
+    fetch(config.API_HOST + "/branches", {
+      method: "GET",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        branches = data;
+      })
+      .catch((error) => {
+        console.error("Error fetching branches:", error);
+        alert("Error fetching branches");
+      });
+
     if (contract.zone != "2") {
       showStatus = false;
     }
@@ -42,40 +61,37 @@
     }
 
     var tag = contract;
-    let signatories = [];
-    const formData = new FormData(e.target);
-    for (let field of formData) {
-      const [key, value] = field;
+    // let signatories = [];
+    // const formData = new FormData(e.target);
+    // for (let field of formData) {
+    //   const [key, value] = field;
 
-      // Check if the key belongs to the 'signatory' fields
-      if (key.startsWith("signatory[")) {
-        // Extract the index and field (email or name) using a regular expression
-        const match = key.match(/signatory\[(\d+)\]\.(email|name)/);
-        if (match) {
-          const index = match[1]; // The signatory index
-          const fieldName = match[2]; // The field name (email or name)
+    //   // Check if the key belongs to the 'signatory' fields
+    //   if (key.startsWith("signatory[")) {
+    //     // Extract the index and field (email or name) using a regular expression
+    //     const match = key.match(/signatory\[(\d+)\]\.(email|name)/);
+    //     if (match) {
+    //       const index = match[1]; // The signatory index
+    //       const fieldName = match[2]; // The field name (email or name)
 
-          // Ensure there's an object for this signatory
-          if (!signatories[index]) {
-            signatories[index] = {};
-          }
+    //       // Ensure there's an object for this signatory
+    //       if (!signatories[index]) {
+    //         signatories[index] = {};
+    //       }
 
-          // Assign the value to the correct field (email or name) of the corresponding signatory
-          signatories[index][fieldName] = value;
-        }
-      }
-      // else {
-      //   // For other non-signatory fields, continue adding them normally to the 'tag' object
-      //   // if (key == "branch_id" || key == "property_reference") {
-      //   //   continue;
-      //   // }
+    //       // Assign the value to the correct field (email or name) of the corresponding signatory
+    //       signatories[index][fieldName] = value;
+    //     }
+    //   }
+    //   // else {
+    //   //   // For other non-signatory fields, continue adding them normally to the 'tag' object
+    //   //   // if (key == "branch_id" || key == "property_reference") {
+    //   //   //   continue;
+    //   //   // }
 
-      //   tag[key] = value;
-      // }
-    }
-
-    // Add the signatories array to the tag object
-    tag.signatories = signatories;
+    //   //   tag[key] = value;
+    //   // }
+    // }
 
     tag["country"] = getCountryId();
     dispatch("finish", tag);
@@ -139,12 +155,26 @@
 
       <div class="flex flex-col">
         <label class="font-semibold text-xs">Branch Id</label>
-        <input
+        {#if branches.length}
+          <select
+            class="bg-white p-1 rounded-xs border mt-1 w-full"
+            name="branchId"
+            bind:value={contract.branchId}
+          >
+            <option disabled value="">--Select--</option>
+            {#each branches as branch}
+              <option value={String(branch.id)}>{branch.name}</option>
+            {/each}
+          </select>
+        {:else}
+          <p>Loading branches...</p>
+        {/if}
+        <!-- <input
           class="bg-white p-1 rounded-xs border mt-1 w-full"
           name="branchId"
           type="number"
           bind:value={contract.branchId}
-        />
+        /> -->
       </div>
 
       <div class="flex flex-col">

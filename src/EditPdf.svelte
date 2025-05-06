@@ -13,6 +13,7 @@
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
   import { placeHolders } from "./utils/placeHolders";
   import {
+    addCheckbox,
     addTextField,
     addDrawing,
     addPDF,
@@ -58,7 +59,29 @@
         pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         pdfName = pdfJsonData.pdfName;
         contractInfo = pdfJsonData.contract;
-        console.log(contractInfo);
+        const _signatories = allObjects
+          .flat() // flatten the outer array
+          .filter((item) => item.type === "signatory") // filter only signatory items
+          .map((item) => item.signatory); // extract the signatory object
+
+        signatories = Object.values(
+          _signatories.reduce((acc, signatory) => {
+            acc[signatory.email] = signatory; // overwrites duplicates, keeps one
+            return acc;
+          }, {})
+        );
+
+        console.log(signatories);
+        signatories.forEach((signatory) => {
+          placeHolders.InsertChildren("Signatories", [
+            {
+              _name: signatory.email,
+              _datafield: signatory.email,
+              _case: "Signatory",
+            },
+          ]);
+        });
+
         // await addPDF(pdfBlob, pages, allObjects, pdfName, pdfFile, pagesScale);
         ({ pages, allObjects, pdfName, pdfFile, pagesScale } = await addPDF(
           pdfBlob,
@@ -204,14 +227,23 @@
     // if (e.target.value) {
     // }
     if (selectedPageIndex >= 0) {
-      ({ pages, allObjects } = await addTextField(
-        e.target,
-        pages,
-        selectedPageIndex,
-        allObjects,
-        signatories,
-        currentFont
-      ));
+      if (e.target.value === "Checkbox") {
+        ({ pages, allObjects } = await addCheckbox(
+          e.target,
+          pages,
+          selectedPageIndex,
+          allObjects
+        ));
+      } else {
+        ({ pages, allObjects } = await addTextField(
+          e.target,
+          pages,
+          selectedPageIndex,
+          allObjects,
+          signatories,
+          currentFont
+        ));
+      }
       e.target.value = "";
     } else {
       alert("Please select a page first");
@@ -559,6 +591,7 @@
             <Signatory
               {index}
               {_placeholders}
+              {signatory}
               on:remove={() => removeSignatory(index)}
               on:handle_input={(e) => handleSignatoryInput(e, index)}
             />

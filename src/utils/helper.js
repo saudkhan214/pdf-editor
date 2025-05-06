@@ -1,9 +1,24 @@
-export function ggID() {
+// export function ggID() {
+//   let id = 0;
+//   return function genId() {
+//     return id++;
+//   };
+// }
+
+export function ggID(nestedArray = null) {
   let id = 0;
+
+  if (Array.isArray(nestedArray)) {
+    // Flatten the nested array and extract ids
+    const allIds = nestedArray.flat().map(obj => obj.id).filter(id => typeof id === 'number');
+    id = allIds.length > 0 ? Math.max(...allIds) + 1 : 0;
+  }
+
   return function genId() {
     return id++;
   };
 }
+
 export function timeout(ms) {
   return new Promise((res) => setTimeout(res, ms));
 }

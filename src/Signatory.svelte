@@ -6,11 +6,11 @@
   const dispatch = createEventDispatcher();
 
   // Store the values for multiple input fields
-  let signatory = {
+  export let signatory = {
     email: "",
     name: "",
   };
-
+  console.log("signatory", signatory);
   let showOptions = false; // Controls visibility of the options list
   let filteredOptions = _placeholders; // The filtered options based on user input
   let activeInput = ""; // Track the currently active input field

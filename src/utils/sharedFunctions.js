@@ -1,7 +1,6 @@
 import { ggID, calculateObjectPosition } from "./helper.js";
 import prepareAssets, { fetchFont } from "./prepareAssets.js";
 import { readAsImage, readAsPDF, readAsDataURL } from "./asyncReader.js";
-const genID = ggID();
 
 export async function addTextField(
   target,
@@ -11,6 +10,7 @@ export async function addTextField(
   signatories,
   currentFont
 ) {
+  const genID = ggID(allObjects);
   const selectedOption = target.selectedOptions[0];
   const dataObj = JSON.parse(selectedOption.dataset.obj);
 
@@ -60,6 +60,7 @@ export async function addCheckbox(
   selectedPageIndex,
   allObjects
 ) {
+  const genID = ggID(allObjects);
   const selectedOption = target.selectedOptions[0];
   const dataObj = JSON.parse(selectedOption.dataset.obj);
 
