@@ -277,6 +277,25 @@
       alert("Some thing went wrong");
     }
   }
+
+  function openDocument(inputUrl) {
+    let url = inputUrl.includes("localhost")
+      ? inputUrl.replace(/^https:\/\//, "http://")
+      : inputUrl;
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch file");
+        return response.blob();
+      })
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank"); // Open in new tab
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Could not load document.");
+      });
+  }
 </script>
 
 {#if !pageLoaded}
@@ -352,14 +371,14 @@
       {:else if signCompleted}
         <span class="text-green-600 font-bold">
           PDF has been signed. You can download it{" "}
-          <a
-            href={signedPdfUrl}
+          <button
+            on:click={() => openDocument(signedPdfUrl)}
             target="_blank"
             rel="noopener noreferrer"
             class="underline text-blue-600"
           >
             here
-          </a>
+          </button>
         </span>
       {/if}
     </div>

@@ -63,6 +63,7 @@
   function removeSignatory(index) {
     signatories = signatories.filter((_, i) => i !== index);
     placeHolders.RemoveChildren("Signatories", index);
+    _placeholders = placeHolders.GetChilderns(selectedEntity);
   }
   function handleSignatoryInput({ detail }, index) {
     signatories[index] = detail.signatory;
@@ -76,6 +77,7 @@
         },
       ]);
     }
+    _placeholders = placeHolders.GetChilderns(selectedEntity);
   }
   async function onUploadPDF(e) {
     const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
