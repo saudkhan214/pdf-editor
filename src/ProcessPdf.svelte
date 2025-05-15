@@ -31,6 +31,7 @@
   let signatureProviders = [];
   let docSignWindow;
   let selectedSignatureProvider;
+  let recipientSigningStatus;
   onMount(async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -48,17 +49,13 @@
         );
         // console.log("pdfJsonData", pdfJsonData);
         signatureProviders = pdfJsonData.signatureProviders;
-        if (pdfJsonData.pdfMetadata["sign_requested"]) {
-          signRequested =
-            pdfJsonData.pdfMetadata["sign_requested"].toLowerCase() === "true";
+        if (pdfJsonData.signedContract) {
+          signRequested = pdfJsonData.signedContract.sentForSignature;
+          signCompleted = pdfJsonData.signedContract.signedOn;
+          signedPdfUrl = pdfJsonData.signedContract.url;
         }
-        if (pdfJsonData.pdfMetadata["signed"]) {
-          signCompleted =
-            pdfJsonData.pdfMetadata["signed"].toLowerCase() === "true";
-        }
-        if (pdfJsonData.pdfMetadata["signed_pdf_url"]) {
-          signedPdfUrl = pdfJsonData.pdfMetadata["signed_pdf_url"];
-        }
+        recipientSigningStatus = pdfJsonData.recipientSigningStatus;
+        console.log("recipientSigningStatus", recipientSigningStatus);
         const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
           // Check if any item in the array has type === "signatory"
           if (
@@ -93,14 +90,6 @@
 
         await fetchFont(currentFont);
         prepareAssets();
-        // await processPdf(
-        //   pdfFile,
-        //   allObjects,
-        //   "Contract.pdf",
-        //   entity_id,
-        //   entity_name,
-        //   isSigning
-        // );
         pageLoaded = true;
         window.addEventListener("message", handleMessage);
         // window.close();
@@ -109,7 +98,7 @@
       }
     } catch (ex) {
       console.log(ex);
-      alert("Some thing went wrong");
+      alert(ex.message);
     }
   });
 
@@ -217,7 +206,12 @@
         method: "GET",
       }
     );
-    return await res.json();
+    var text = await res.text();
+    if (!res.ok) {
+      console.log("Failed to fetch pdf resource", text);
+      throw new Error(text);
+    }
+    return JSON.parse(text);
   }
   // async function addPDF(file) {
   //   try {
@@ -295,6 +289,13 @@
         console.error("Error:", error);
         alert("Could not load document.");
       });
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr || new Date(dateStr).getFullYear() === 1) {
+      return "N/A";
+    }
+    return new Date(dateStr).toLocaleString(); // Or your desired format
   }
 </script>
 
@@ -442,6 +443,51 @@
             </div>
           {/each}
         </div>
+        {#if recipientSigningStatus}
+          <div class="p-6">
+            <div
+              class="w-full max-w-sm bg-white shadow-md rounded-lg border border-gray-200 p-4 space-y-4"
+            >
+              <h2 class="text-lg font-semibold border-b pb-2">
+                Recipients Signing Status
+              </h2>
+              {#each recipientSigningStatus as recipient}
+                <div
+                  class="text-sm border-b last:border-none pb-2 mb-2 last:mb-0"
+                >
+                  <p>
+                    <span class="font-medium">Name:</span>
+                    {recipient.recipientName}
+                  </p>
+                  <p>
+                    <span class="font-medium">Email:</span>
+                    {recipient.recipientEmail}
+                  </p>
+                  <p>
+                    <span class="font-medium">Status:</span>
+                    <span class="text-green-600">
+                      {recipient.status
+                        ? recipient.status.toUpperCase()
+                        : "Pending"}
+                    </span>
+                  </p>
+                  {#if recipient.sentAt}
+                    <p>
+                      <span class="font-medium">Sent At:</span>
+                      {formatDate(recipient.sentAt)}
+                    </p>
+                  {/if}
+                  {#if recipient.signedAt}
+                    <p>
+                      <span class="font-medium">Signed At:</span>
+                      {formatDate(recipient.signedAt)}
+                    </p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     {:else}
       <div

@@ -14,6 +14,8 @@
   $: contract.status = String(contract.status);
   $: contract.branchId = String(contract.branchId);
   $: contract.propertyId = String(contract.propertyId);
+
+  contract.branchId = contract.branchId === null ? "" : contract.branchId;
   console.log("contract", contract);
   const dispatch = createEventDispatcher();
 

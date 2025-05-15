@@ -110,6 +110,11 @@
         method: "GET",
       }
     );
+    if (!res.ok && res.status === 401) {
+      // Handle 401 Unauthorized error
+      console.error("Unauthorized access");
+      alert("Unauthorized access");
+    }
     return await res.json();
   }
   function addSignatory() {
