@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from "svelte";
   import { config } from "./utils/config.js";
   export var contract = {
+    id,
     templateName: "",
     module: "",
     branchId: "",

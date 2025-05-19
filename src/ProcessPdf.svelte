@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import { config } from "./utils/config";
-  import { processPdf, save } from "./utils/PDF.js";
+  import { processPdf, downloadPdf } from "./utils/PDF.js";
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
   import PDFPage from "./PDFPage.svelte";
   import Text from "./Text.svelte";
@@ -20,9 +20,6 @@
   let entity_name;
   let entity_id;
   let resource_id;
-  let user_id;
-  let group_id;
-  // let isSigning;
   let hasSignatory = false;
   let signRequested = false;
   let signCompleted = false;
@@ -32,6 +29,8 @@
   let docSignWindow;
   let selectedSignatureProvider;
   let recipientSigningStatus;
+  let contract;
+  let useTransaction = false;
   onMount(async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -52,10 +51,10 @@
         if (pdfJsonData.signedContract) {
           signRequested = pdfJsonData.signedContract.sentForSignature;
           signCompleted = pdfJsonData.signedContract.signedOn;
-          signedPdfUrl = pdfJsonData.signedContract.url;
+          signedPdfUrl = pdfJsonData.signedContract.contractUrl;
         }
         recipientSigningStatus = pdfJsonData.recipientSigningStatus;
-        console.log("recipientSigningStatus", recipientSigningStatus);
+        contract = pdfJsonData.contract;
         const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
           // Check if any item in the array has type === "signatory"
           if (
@@ -68,10 +67,9 @@
           // Return the array without signatory items
           return a.filter((x) => x.type !== "signatory");
         });
+        console.log("hasSignatory", hasSignatory);
         allObjects = metaData;
         const base64Pdf = pdfJsonData.pdf;
-        user_id = pdfJsonData.userId;
-        group_id = pdfJsonData.groupId;
         const byteCharacters = atob(base64Pdf);
         const byteNumbers = new Array(byteCharacters.length)
           .fill(0)
@@ -106,21 +104,22 @@
     window.removeEventListener("message", handleMessage);
   });
 
-  async function downloadPdf() {
+  async function handleDownloadPdf() {
     pdfProcessing = true;
-    const metaData = allObjects.map(
-      (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
-    );
-    console.log(metaData);
-    await processPdf(
-      pdfFile,
-      metaData,
-      "Contract.pdf",
-      entity_id,
-      entity_name,
-      false
-    );
-    pdfProcessing = false;
+    try {
+      const metaData = allObjects.map(
+        (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
+      );
+      console.log(metaData);
+      //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
+      let pdfBytes = await processPdf(pdfFile, metaData);
+      downloadPdf(pdfBytes, "Contract.pdf");
+    } catch (e) {
+      console.log(e);
+      alert("Some thing went wrong");
+    } finally {
+      pdfProcessing = false;
+    }
   }
   async function sendForSignature() {
     pdfProcessing = true;
@@ -128,29 +127,32 @@
       (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
     );
     try {
-      await processPdf(
-        pdfFile,
-        metaData,
-        `${resource_id}.pdf`,
-        entity_id,
-        entity_name,
-        true
-      );
-
+      //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
+      let pdfBytes = await processPdf(pdfFile, metaData);
+      const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
       const baseUrl = `${config.API_HOST}/signpdf/${selectedSignatureProvider}`;
-      const params = new URLSearchParams({
-        resource_id,
-        entity_name,
-        entity_id,
-        user_id,
-        group_id,
-      });
 
-      const fullUrl = `${baseUrl}?${params.toString()}`;
-      console.log("fullUrl", fullUrl);
+      var data = new FormData();
+      data.append("pdf", pdfBlob, `${resource_id}.pdf`);
+      data.append("entityName", entity_name);
+      data.append("entityId", entity_id);
+      data.append("contractId", contract.id);
+      data.append("resourceId", resource_id);
+      data.append("useTransaction", useTransaction);
 
-      var res = await fetch(fullUrl, {
-        method: "GET",
+      // const params = new URLSearchParams({
+      //   resource_id,
+      //   entity_name,
+      //   entity_id,
+      //   group_id,
+      // });
+
+      // const fullUrl = `${baseUrl}?${params.toString()}`;
+      // console.log("fullUrl", fullUrl);
+
+      var res = await fetch(baseUrl, {
+        method: "POST",
+        body: data,
       });
       var data = await res.json();
       console.log("data", data);
@@ -167,7 +169,11 @@
             alert("Please allow popups for this website.");
           }
         } else {
-          alert(data.message);
+          alert(
+            data.message +
+              " \n" +
+              "Please wait for couple of minutes then check your email"
+          );
         }
       } else {
         alert(data.message);
@@ -176,6 +182,7 @@
       console.log(e);
       alert("Some thing went wrong");
     } finally {
+      window.location.reload();
       pdfProcessing = false;
     }
   }
@@ -337,7 +344,7 @@
         bg-gray-200 border-b border-gray-300"
     >
       <button
-        on:click={downloadPdf}
+        on:click={handleDownloadPdf}
         disabled={pdfProcessing}
         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3
           md:px-4 mr-3 md:mr-4 rounded {pdfProcessing
@@ -346,7 +353,7 @@
       >
         Download
       </button>
-      {#if hasSignatory && !signRequested}
+      {#if hasSignatory && !signRequested && signatureProviders.length > 0}
         <button
           on:click={sendForSignature}
           disabled={pdfProcessing}
@@ -365,6 +372,22 @@
             <option value={provider}>{provider.toUpperCase()}</option>
           {/each}
         </select>
+        {#if entity_name.toLowerCase() == "unit"}
+          <div class="p-1 flex items-center">
+            <input
+              id="checked-checkbox"
+              type="checkbox"
+              bind:checked={useTransaction}
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <label
+              for="checked-checkbox"
+              class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              >Use Transaction</label
+            >
+          </div>
+        {/if}
+        <!-- <input type="checkbox" class="p-1" bind:value={useTransaction} /> -->
       {:else if signRequested && !signCompleted}
         <span class="text-green-600 font-bold">
           PDF has been sent for signature.

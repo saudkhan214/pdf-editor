@@ -51,14 +51,12 @@ export async function edit(resource_id, pdfFile, objects, tags, contract_id) {
     return { error: ex.message, success: false };
   }
 }
-
+export function downloadPdf(pdfBytes, name) {
+  download(pdfBytes, name, "application/pdf");
+}
 export async function processPdf(
   pdfFile,
-  objects,
-  name,
-  entityId,
-  entityName,
-  is_signing
+  objects
 ) {
   const PDFLib = await getAsset("PDFLib");
   const download = await getAsset("download");
@@ -188,23 +186,24 @@ export async function processPdf(
   });
   await Promise.all(pagesProcesses);
   try {
-    const pdfBytes = await pdfDoc.save();
+    return await pdfDoc.save();
     // Convert Uint8Array to Blob
-    const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
-    var data = new FormData();
-    data.append("pdf", pdfBlob, name);
-    data.append("is_processed_pdf", true);
-    data.append("entityName", entityName);
-    data.append("entityId", entityId);
-    if (is_signing) {
-      await fetch(`${config.API_HOST}/contract/save-pdf`, {
-        method: "POST",
-        body: data,
-      });
-    } else {
-      download(pdfBytes, name, "application/pdf");
-      // window.close()
-    }
+    //const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
+    // if (is_signing) {
+    //   var data = new FormData();
+    //   data.append("pdf", pdfBlob, name);
+    //   data.append("is_processed_pdf", true);
+    //   data.append("entityName", entityName);
+    //   data.append("entityId", entityId);
+    //   data.append("contractId", contractId);
+    //   await fetch(`${config.API_HOST}/contract/save-pdf`, {
+    //     method: "POST",
+    //     body: data,
+    //   });
+    // } else {
+    //   download(pdfBytes, name, "application/pdf");
+    //   // window.close()
+    // }
   } catch (e) {
     console.log("Failed to process PDF.");
     throw e;
