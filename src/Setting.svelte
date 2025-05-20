@@ -2,13 +2,13 @@
   import { createEventDispatcher, onMount } from "svelte";
   import { config } from "./utils/config.js";
   export var contract = {
-    id,
+    id: 0,
     templateName: "",
     module: "",
     branchId: "",
     propertyId: "",
     zone: "",
-    status: "",
+    status: "512",
   };
   $: contract.module = String(contract.module);
   $: contract.zone = String(contract.zone);
@@ -104,7 +104,7 @@
     contract = {
       ...contract, // Clone the existing state
       zone: e.target.value, // Update zone explicitly
-      status: e.target.value === "2" ? contract.status : "", // Clear status only when needed
+      status: e.target.value === "2" ? contract.status : "512", // set 512 for maintenance contract
     };
     showStatus = e.target.value === "2";
   }
