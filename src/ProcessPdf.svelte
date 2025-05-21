@@ -30,7 +30,6 @@
   let selectedSignatureProvider;
   let recipientSigningStatus;
   let contract;
-  let useTransaction = false;
   onMount(async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -138,17 +137,6 @@
       data.append("entityId", entity_id);
       data.append("contractId", contract.id);
       data.append("resourceId", resource_id);
-      data.append("useTransaction", useTransaction);
-
-      // const params = new URLSearchParams({
-      //   resource_id,
-      //   entity_name,
-      //   entity_id,
-      //   group_id,
-      // });
-
-      // const fullUrl = `${baseUrl}?${params.toString()}`;
-      // console.log("fullUrl", fullUrl);
 
       var res = await fetch(baseUrl, {
         method: "POST",
@@ -372,22 +360,6 @@
             <option value={provider}>{provider.toUpperCase()}</option>
           {/each}
         </select>
-        {#if entity_name.toLowerCase() == "unit"}
-          <div class="p-1 flex items-center">
-            <input
-              id="checked-checkbox"
-              type="checkbox"
-              bind:checked={useTransaction}
-              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-            />
-            <label
-              for="checked-checkbox"
-              class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >Use Transaction</label
-            >
-          </div>
-        {/if}
-        <!-- <input type="checkbox" class="p-1" bind:value={useTransaction} /> -->
       {:else if signRequested && !signCompleted}
         <span class="text-green-600 font-bold">
           PDF has been sent for signature.
