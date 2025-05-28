@@ -6,9 +6,11 @@
   import Image from "./Image.svelte";
   import Text from "./Text.svelte";
   import Signatory from "./Signatory.svelte";
+  import Recipient from "./Recipient.svelte";
   import Drawing from "./Drawing.svelte";
   import DrawingCanvas from "./DrawingCanvas.svelte";
   import Checkbox from "./Checkbox.svelte";
+  import Stamp from "./Stamp.svelte";
   import prepareAssets, { fetchFont } from "./utils/prepareAssets.js";
   import { placeHolders } from "./utils/placeHolders";
   import { save } from "./utils/PDF.js";
@@ -19,6 +21,7 @@
     addDrawing,
     addPDF,
     addImage,
+    addStamp,
   } from "./utils/sharedFunctions.js";
   let pdfFile;
   let pdfName = "";
@@ -180,6 +183,60 @@
         : objects
     );
   }
+
+  function updateStamp(objectId, stampIndex, updatedStamp) {
+    allObjects = allObjects.map((objects, pIndex) =>
+      pIndex === selectedPageIndex
+        ? objects.map((object) => {
+            if (object.id === objectId) {
+              const stamps = (
+                object.signatory && Array.isArray(object.signatory.stamps)
+                  ? object.signatory.stamps
+                  : []
+              ).map((stamp, index) =>
+                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp
+              );
+
+              return {
+                ...object,
+                signatory: {
+                  ...(object.signatory || {}),
+                  stamps: stamps,
+                },
+              };
+            }
+            return object;
+          })
+        : objects
+    );
+  }
+
+  function deleteStamp(objectId, stampIndex) {
+    allObjects = allObjects.map((objects, pIndex) =>
+      pIndex === selectedPageIndex
+        ? objects.map((object) => {
+            if (object.id === objectId) {
+              const stamps =
+                object.signatory && Array.isArray(object.signatory.stamps)
+                  ? object.signatory.stamps.filter(
+                      (_, index) => index !== stampIndex
+                    )
+                  : [];
+
+              return {
+                ...object,
+                signatory: {
+                  ...(object.signatory || {}),
+                  stamps: stamps,
+                },
+              };
+            }
+            return object;
+          })
+        : objects
+    );
+  }
+
   function onMeasure(scale, i) {
     pagesScale[i] = scale;
   }
@@ -203,6 +260,15 @@
     } finally {
       saving = false;
     }
+  }
+
+  async function handleStamp(object) {
+    ({ pages, allObjects } = await addStamp(
+      object,
+      pages,
+      selectedPageIndex,
+      allObjects
+    ));
   }
 </script>
 
@@ -391,7 +457,7 @@
                       height={object.height}
                       pageScale={pagesScale[pIndex]}
                     />
-                  {:else if object.type === "text" || object.type === "signatory"}
+                  {:else if object.type === "text"}
                     <Text
                       on:update={(e) => updateObject(object.id, e.detail)}
                       on:delete={() => deleteObject(object.id)}
@@ -406,6 +472,27 @@
                       fontWeight={object.fontWeight}
                       pageScale={pagesScale[pIndex]}
                     />
+                  {:else if object.type === "signatory"}
+                    <Signatory
+                      on:update={(e) => updateObject(object.id, e.detail)}
+                      on:delete={() => deleteObject(object.id)}
+                      on:stamp={() => handleStamp(object)}
+                      text={object.text}
+                      x={object.x}
+                      y={object.y}
+                      pageScale={pagesScale[pIndex]}
+                    />
+                    {#if object.signatory.stamps}
+                      {#each object.signatory.stamps as stamp, i}
+                        <Stamp
+                          on:update={(e) => updateStamp(object.id, i, e.detail)}
+                          on:delete={() => deleteStamp(object.id, i)}
+                          x={stamp.x}
+                          y={stamp.y}
+                          pageScale={pagesScale[pIndex]}
+                        />
+                      {/each}
+                    {/if}
                   {:else if object.type === "checkbox"}
                     <Checkbox
                       on:update={(e) => updateObject(object.id, e.detail)}
@@ -440,7 +527,7 @@
         </h5>
         <div class="grid grid-cols-1 gap-2">
           {#each signatories as signatory, index}
-            <Signatory
+            <Recipient
               {index}
               {_placeholders}
               on:remove={() => removeSignatory(index)}

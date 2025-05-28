@@ -1,136 +1,317 @@
+<svelte:options immutable={true} />
+
 <script>
-  export let index; // Receive the index from the parent
-  export let _placeholders = [];
-  import { createEventDispatcher } from "svelte";
-
+  import { onMount, createEventDispatcher } from "svelte";
+  import Toolbar from "./Toolbar.svelte";
+  import { pannable } from "./utils/pannable.js";
+  import { tapout } from "./utils/tapout.js";
+  import { timeout } from "./utils/helper.js";
+  import { Fonts } from "./utils/prepareAssets.js";
+  //   export let size;
+  //   export let fontWeight;
+  export let text;
+  //   export let lineHeight;
+  export let x;
+  export let y;
+  //   export let fontFamily;
+  //   export let fontColor;
+  export let pageScale = 1;
+  const Families = Object.keys(Fonts);
   const dispatch = createEventDispatcher();
-
-  // Store the values for multiple input fields
-  export let signatory = {
-    email: "",
-    name: "",
-  };
-  console.log("signatory", signatory);
-  let showOptions = false; // Controls visibility of the options list
-  let filteredOptions = _placeholders; // The filtered options based on user input
-  let activeInput = ""; // Track the currently active input field
-
-  // Toggle the dropdown for a specific input
-  function toggleOptions(inputName) {
-    // Set the active input and toggle the dropdown
-    activeInput = inputName;
-    showOptions = !showOptions;
+  let startX;
+  let startY;
+  let editable;
+  //   let _size = size;
+  //   let _fontWeight = fontWeight;
+  //   let _lineHeight = lineHeight;
+  //   let _fontFamily = fontFamily;
+  //   let _fontColor = fontColor;
+  let dx = 0;
+  let dy = 0;
+  let operation = "";
+  const basePath = process.env.BASE_PATH;
+  function handlePanMove(event) {
+    dx = (event.detail.x - startX) / pageScale;
+    dy = (event.detail.y - startY) / pageScale;
   }
 
-  function handleInputBlur() {
-    handleInputChange(activeInput); // Dispatch the input change event
-  }
-  // Select an option and set it to the active input field
-  function selectOption(option) {
-    signatory[activeInput] = option; // Set the selected option for the active input
-    showOptions = false; // Hide the dropdown after selection
-
-    handleInputChange(activeInput);
-  }
-
-  // Filter options based on input value (common for both input fields)
-  function filterOptions() {
-    const currentInputValue = signatory[activeInput];
-    if (currentInputValue == undefined) {
-      return;
+  function handlePanEnd(event) {
+    console.log("enter handlePanEnd");
+    if (dx === 0 && dy === 0) {
+      return editable.focus();
     }
+    dispatch("update", {
+      x: x + dx,
+      y: y + dy,
+      lines: extractLines(),
+      width: editable.clientWidth,
+      text: editable.textContent,
+    });
+    dx = 0;
+    dy = 0;
+    operation = "";
 
-    if (currentInputValue.trim() === "") {
-      filteredOptions = _placeholders;
-    } else {
-      filteredOptions = _placeholders.filter((option) =>
-        option._name.toLowerCase().includes(currentInputValue.toLowerCase())
-      );
+    console.log("end handlePanEnd");
+  }
+  function handlePanStart(event) {
+    startX = event.detail.x;
+    startY = event.detail.y;
+    operation = "move";
+  }
+  function onFocus() {
+    operation = "edit";
+  }
+  async function onBlur() {
+    if (operation !== "edit" || operation === "tool") return;
+    editable.blur();
+    sanitize();
+    dispatch("update", {
+      lines: extractLines(),
+      width: editable.clientWidth,
+      text: editable.textContent,
+    });
+    operation = "";
+  }
+  async function onPaste(e) {
+    // get text only
+    const pastedText = e.clipboardData.getData("text");
+    document.execCommand("insertHTML", false, pastedText);
+    // await tick() is not enough
+    await timeout();
+    sanitize();
+  }
+  function onKeydown(e) {
+    const childNodes = Array.from(editable.childNodes);
+    if (e.keyCode === 13) {
+      // prevent default adding div behavior
+      e.preventDefault();
+      const selection = window.getSelection();
+      const focusNode = selection.focusNode;
+      const focusOffset = selection.focusOffset;
+      // the caret is at an empty line
+      if (focusNode === editable) {
+        editable.insertBefore(
+          document.createElement("br"),
+          childNodes[focusOffset]
+        );
+      } else if (focusNode instanceof HTMLBRElement) {
+        editable.insertBefore(document.createElement("br"), focusNode);
+      }
+      // the caret is at a text line but not end
+      else if (focusNode.textContent.length !== focusOffset) {
+        document.execCommand("insertHTML", false, "<br>");
+        // the carat is at the end of a text line
+      } else {
+        let br = focusNode.nextSibling;
+        if (br) {
+          editable.insertBefore(document.createElement("br"), br);
+        } else {
+          br = editable.appendChild(document.createElement("br"));
+          br = editable.appendChild(document.createElement("br"));
+        }
+        // set selection to new line
+        selection.collapse(br, 0);
+      }
     }
   }
-
-  // Watch for changes in the active input value to filter options
-  $: filterOptions();
-
-  // Function to remove this Signatory component
-  function removeSignatory() {
-    dispatch("remove");
+  function onFocusTool() {
+    operation = "tool";
   }
-  function handleInputChange(activeInput) {
-    dispatch("handle_input", {
-      signatory,
-      activeInput,
+  async function onBlurTool() {
+    if (operation !== "tool" || operation === "edit") return;
+    dispatch("update", {
+      lines: extractLines(),
+      // lineHeight: _lineHeight,
+      // size: _size,
+      // fontFamily: _fontFamily,
+    });
+    operation = "";
+  }
+  function sanitize() {
+    let weirdNode;
+    while (
+      (weirdNode = Array.from(editable.childNodes).find(
+        (node) => !["#text", "BR"].includes(node.nodeName)
+      ))
+    ) {
+      editable.removeChild(weirdNode);
+    }
+  }
+  function onChangeFont() {
+    dispatch("selectFont", {
+      name: _fontFamily,
     });
   }
+  function onChangeColor() {
+    dispatch("update", {
+      fontColor: _fontColor,
+    });
+  }
+  function render() {
+    editable.innerHTML = text;
+    // editable.focus();
+  }
+  function extractLines() {
+    const nodes = editable.childNodes;
+    const lines = [];
+    let lineText = "";
+    for (let index = 0; index < nodes.length; index++) {
+      const node = nodes[index];
+      if (node.nodeName === "BR") {
+        lines.push(lineText);
+        lineText = "";
+      } else {
+        lineText += node.textContent;
+      }
+    }
+    lines.push(lineText);
+    return lines;
+  }
+  function onDelete() {
+    dispatch("delete");
+  }
+  function handleStamp() {
+    dispatch("stamp");
+  }
+  onMount(render);
 </script>
 
-<div class="border border-gray-200 rounded-lg p-2 relative">
-  <div class="grid grid-cols-2 grid-rows-1 gap-2">
-    <div class="flex flex-col">
-      <label class="font-semibold text-xs">Email</label>
-      <input
-        autocomplete="off"
-        class="bg-white p-1 rounded-xs border mt-1"
-        name="signatory[{index}].email"
-        type="text"
-        bind:value={signatory.email}
-        on:blur={() => handleInputBlur()}
-        on:click={() => toggleOptions("email")}
-      />
-    </div>
-
-    <div class="flex flex-col">
-      <label class="font-semibold text-xs">Name</label>
-      <input
-        autocomplete="off"
-        class="bg-white p-1 rounded-xs border mt-1"
-        name="signatory[{index}].name"
-        type="text"
-        bind:value={signatory.name}
-        on:click={() => toggleOptions("name")}
-      />
-    </div>
-  </div>
-
-  {#if showOptions && _placeholders.length > 0}
-    <ul
-      class="absolute z-10 w-full bg-white border border-gray-300 rounded-md mt-1"
+{#if operation}
+  <Toolbar>
+    <div
+      use:tapout
+      on:tapout={onBlurTool}
+      on:mousedown={onFocusTool}
+      on:touchstart={onFocusTool}
+      class="h-full flex justify-center items-center bg-gray-300 border-b
+      border-gray-400"
     >
-      {#each _placeholders as option}
-        <li
-          class="px-4 py-2 cursor-pointer hover:bg-gray-200"
-          on:click={() => selectOption(option._datafield)}
-        >
-          {option._name}
-        </li>
-      {/each}
-    </ul>
-  {/if}
+      <!-- <div class="mr-2 flex items-center">
+        <img
+          src={`${basePath}line_height.svg`}
+          class="w-6 mr-2"
+          alt="Line height"
+        />
+        <input
+          type="number"
+          min="1"
+          max="10"
+          step="0.1"
+          class="h-6 w-12 text-center flex-shrink-0 rounded-sm"
+          bind:value={_lineHeight}
+        />
+      </div> -->
+      <!-- <div class="mr-2 flex items-center">
+        <img src={`${basePath}text.svg`} class="w-6 mr-2" alt="Font size" />
+        <input
+          type="number"
+          min="6"
+          max="120"
+          step="1"
+          class="h-6 w-12 text-center flex-shrink-0 rounded-sm"
+          bind:value={_size}
+        />
+      </div> -->
+      <!-- <div class="mr-2 flex items-center">
+        <img
+          src={`${basePath}text-family.svg`}
+          class="w-4 mr-2"
+          alt="Font family"
+        />
+        <div class="relative w-32 md:w-40">
+          <select
+            bind:value={_fontFamily}
+            on:change={onChangeFont}
+            class="font-family"
+          >
+            {#each Families as family}
+              <option value={family}>{family}</option>
+            {/each}
+          </select>
+          <div
+            class="pointer-events-none absolute inset-y-0 right-0 flex
+            items-center px-2 text-gray-700"
+          >
+            <svg
+              class="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757
+                6.586 4.343 8z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div> -->
 
-  {#if index > 0}
-    <button type="button" on:click={removeSignatory}>
-      <svg
-        class="w-5 h-5"
-        xmlns="http://www.w3.org/2000/svg"
-        x="0px"
-        y="0px"
-        width="48"
-        height="48"
-        viewBox="0 0 48 48"
+      <!-- <div class="mr-2 flex items-center">
+        <img
+          src={`${basePath}font-weight.svg`}
+          class="w-4 mr-2"
+          alt="Font family"
+        />
+        <select bind:value={_fontWeight}>
+          <option value="100">Normal</option>
+          <option value="600">Bold</option>
+          <option value="800">Bolder</option>
+        </select>
+      </div> -->
+      <!-- <div class="mr-2 flex items-center">
+        <input type="color" bind:value={_fontColor} on:input={onChangeColor} />
+      </div> -->
+      <div class="mr-2 flex items-center cursor-pointer" on:click={handleStamp}>
+        <img src={`${basePath}stamp.png`} class="w-4 mr-2" alt="Stamp" />
+      </div>
+      <div
+        on:click={onDelete}
+        class="w-5 h-5 rounded-full bg-white cursor-pointer"
       >
-        <path
-          fill="#f44336"
-          d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-        ></path>
-        <path fill="#fff" d="M14,21h20v6H14V21z"></path>
-      </svg>
-    </button>
-  {/if}
+        <img
+          class="w-full h-full"
+          src={`${basePath}delete.svg`}
+          alt="delete object"
+        />
+      </div>
+    </div>
+  </Toolbar>
+{/if}
+<div
+  use:tapout
+  on:tapout={onBlur}
+  class="absolute left-0 top-0 select-none"
+  style="transform: translate({x + dx}px, {y + dy}px);"
+>
+  <div
+    use:pannable
+    on:panstart={handlePanStart}
+    on:panmove={handlePanMove}
+    on:panend={handlePanEnd}
+    class="absolute w-full h-full cursor-grab border border-dotted
+    border-gray-500"
+    class:cursor-grab={!operation}
+    class:cursor-grabbing={operation === "move"}
+    class:editing={["edit", "tool"].includes(operation)}
+  />
+  <div
+    bind:this={editable}
+    on:focus={onFocus}
+    on:keydown={onKeydown}
+    on:paste|preventDefault={onPaste}
+    contenteditable="true"
+    spellcheck="false"
+    class="outline-none whitespace-no-wrap"
+    style="font-size: 16 px; font-family: , serif;
+    line-height: 1.4;color:black; -webkit-user-select: text;font-weight:100"
+  />
 </div>
 
 <style>
-  ul {
-    max-height: 200px; /* Set a max height for the dropdown */
-    overflow-y: auto; /* Allow scrolling when there are too many options */
+  .editing {
+    @apply pointer-events-none border-gray-800 border-dashed;
+  }
+  .font-family {
+    @apply block appearance-none h-6 w-full bg-white pl-2 pr-8 rounded-sm leading-tight;
   }
 </style>

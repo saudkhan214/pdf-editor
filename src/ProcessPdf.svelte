@@ -7,7 +7,8 @@
   import Text from "./Text.svelte";
   import Checkbox from "./Checkbox.svelte";
   import Tailwind from "./Tailwind.svelte";
-  import { addPDF } from "./utils/sharedFunctions.js";
+  import { addPDF, validateEmail } from "./utils/sharedFunctions.js";
+  import Recipient from "./Recipient.svelte";
   let pageLoaded = false;
   let pdfProcessing = false;
   let allObjects = [];
@@ -30,6 +31,7 @@
   let selectedSignatureProvider;
   let recipientSigningStatus;
   let contract;
+  let carbonCopies = [];
   onMount(async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -104,6 +106,7 @@
   });
 
   async function handleDownloadPdf() {
+    console.log("carbonCopies", JSON.stringify(carbonCopies));
     pdfProcessing = true;
     try {
       const metaData = allObjects.map(
@@ -137,6 +140,7 @@
       data.append("entityId", entity_id);
       data.append("contractId", contract.id);
       data.append("resourceId", resource_id);
+      data.append("carbonCopies", JSON.stringify(carbonCopies));
 
       var res = await fetch(baseUrl, {
         method: "POST",
@@ -292,6 +296,35 @@
     }
     return new Date(dateStr).toLocaleString(); // Or your desired format
   }
+
+  function removeCc(index) {
+    carbonCopies = carbonCopies.filter((_, i) => i !== index);
+  }
+  function handleCcInput({ detail }, index) {
+    if (
+      detail.activeInput === "email" &&
+      !validateEmail(detail.signatory.email)
+    ) {
+      alert("Please enter a valid email address.");
+
+      detail.signatory.email = "";
+      carbonCopies[index] = { ...detail.signatory };
+      return;
+    }
+    carbonCopies[index] = detail.signatory;
+  }
+
+  function addCc() {
+    for (let i = 0; i < carbonCopies.length; i++) {
+      let cc = carbonCopies[i];
+      if (!cc.email || !cc.name) {
+        alert(`Please fill out both the email and name for cc #${i + 1}`);
+        return; // Stop function if validation fails
+      }
+    }
+
+    carbonCopies = [...carbonCopies, {}];
+  }
 </script>
 
 {#if !pageLoaded}
@@ -438,8 +471,46 @@
             </div>
           {/each}
         </div>
-        {#if recipientSigningStatus}
-          <div class="p-6">
+        <div class="p-6">
+          {#if !signRequested}
+            <div
+              class="w-full max-w-sm bg-white shadow-md rounded-lg border border-gray-200 p-4 space-y-4 mb-4"
+            >
+              <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                Receives a Copy
+              </h5>
+              <div class="grid grid-cols-1 gap-2">
+                {#each carbonCopies as cc, index}
+                  <Recipient
+                    {index}
+                    on:remove={() => removeCc(index)}
+                    on:handle_input={(e) => handleCcInput(e, index)}
+                  />
+                {/each}
+              </div>
+
+              <button type="button" class="float-end" on:click={addCc}>
+                <svg
+                  class="w-5 h-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    fill="#1f7bc1"
+                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+                  ></path><path fill="#fff" d="M21,14h6v20h-6V14z"></path><path
+                    fill="#fff"
+                    d="M14,21h20v6H14V21z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          {/if}
+          {#if recipientSigningStatus}
             <div
               class="w-full max-w-sm bg-white shadow-md rounded-lg border border-gray-200 p-4 space-y-4"
             >
@@ -481,8 +552,8 @@
                 </div>
               {/each}
             </div>
-          </div>
-        {/if}
+          {/if}
+        </div>
       </div>
     {:else}
       <div

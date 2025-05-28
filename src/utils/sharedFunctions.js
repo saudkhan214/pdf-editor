@@ -14,7 +14,6 @@ export async function addTextField(
   const selectedOption = target.selectedOptions[0];
   const dataObj = JSON.parse(selectedOption.dataset.obj);
 
-  console.log("target", target);
   let text = target.value;
   text = text === "Textbox" ? text : `[${text}]`;
   const id = genID();
@@ -26,7 +25,7 @@ export async function addTextField(
   var objs = allObjects[selectedPageIndex];
   var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
-  console.log(position);
+  console.log("addTextField", signatories);
   const object = {
     id,
     text,
@@ -86,6 +85,46 @@ export async function addCheckbox(
   allObjects = allObjects.map((objects, pIndex) =>
     pIndex === selectedPageIndex ? [...objects, object] : objects
   );
+
+  return { pages, allObjects };
+}
+
+export async function addStamp(object, pages, selectedPageIndex, allObjects) {
+  console.log("addStamp", object);
+  const stamp = {
+    width: 25,
+    height: 25,
+    x: object.x,
+    y: object.y + 10,
+  };
+
+  const existingStamps =
+    object.signatory && Array.isArray(object.signatory.stamps)
+      ? object.signatory.stamps
+      : [];
+
+  object = {
+    ...object,
+    signatory: {
+      ...object.signatory,
+      stamps: [...existingStamps, stamp],
+    },
+  };
+
+  allObjects = allObjects.map((objects, pIndex) => {
+    if (pIndex !== selectedPageIndex) return objects;
+
+    const objectIndex = objects.findIndex((obj) => obj.id === object.id);
+    if (objectIndex !== -1) {
+      // Replace existing object
+      const newObjects = [...objects];
+      newObjects[objectIndex] = object;
+      return newObjects;
+    } else {
+      // Append new object
+      return [...objects, object];
+    }
+  });
 
   return { pages, allObjects };
 }
@@ -169,4 +208,10 @@ export async function addImage(file, allObjects, selectedPageIndex) {
   } catch (e) {
     console.log(`Fail to add image.`, e);
   }
+}
+
+export function validateEmail(email) {
+  return email.match(
+    /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  );
 }
