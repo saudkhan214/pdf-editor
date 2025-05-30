@@ -100,6 +100,8 @@
           pdfFile,
           pagesScale
         ));
+
+        console.log("pages", pages);
         selectedPageIndex = 0;
       } catch (e) {
         console.log(e);
@@ -139,6 +141,8 @@
           signatories,
           currentFont
         ));
+
+        console.log("pages", pages);
       }
       e.target.value = "";
     } else {

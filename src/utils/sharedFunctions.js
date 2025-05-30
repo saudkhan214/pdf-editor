@@ -23,7 +23,9 @@ export async function addTextField(
   const viewport = selectdPage.getViewport({ scale: 1, rotation: 0 });
   const pageHeight = viewport.height;
   var objs = allObjects[selectedPageIndex];
-  var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
+  var yAxis =
+    (Math.abs(window.scrollY - pageHeight) * selectedPageIndex + 45) *
+    window.devicePixelRatio;
   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
   console.log("addTextField", signatories);
   const object = {

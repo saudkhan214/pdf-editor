@@ -79,15 +79,27 @@
             return acc;
           }, {})
         );
+        if (signatories.length === 0) {
+          signatories = [{}];
+        }
 
         signatories.forEach((signatory) => {
-          placeHolders.InsertChildren("Signatories", [
-            {
-              _name: signatory.email,
-              _datafield: signatory.email,
-              _case: "Signatory",
-            },
-          ]);
+          if (signatory.email && signatory.email.trim() !== "") {
+            placeHolders.InsertChildren("Signatories", [
+              {
+                _name: signatory.email,
+                _datafield: signatory.email,
+                _case: "Signatory",
+              },
+            ]);
+          }
+          // placeHolders.InsertChildren("Signatories", [
+          //   {
+          //     _name: signatory.email,
+          //     _datafield: signatory.email,
+          //     _case: "Signatory",
+          //   },
+          // ]);
         });
 
         // await addPDF(pdfBlob, pages, allObjects, pdfName, pdfFile, pagesScale);
