@@ -55,6 +55,10 @@
           signedPdfUrl = pdfJsonData.signedContract.contractUrl;
         }
         recipientSigningStatus = pdfJsonData.recipientSigningStatus;
+        var declined = declinedBySignatory(recipientSigningStatus);
+        if (declined) {
+          signRequested = false;//reinitiate the signing flow
+        }
         contract = pdfJsonData.contract;
         const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
           // Check if any item in the array has type === "signatory"
@@ -105,6 +109,14 @@
     window.removeEventListener("message", handleMessage);
   });
 
+  function declinedBySignatory(recipientSigningStatus) {
+    if (!recipientSigningStatus || !Array.isArray(recipientSigningStatus))
+      return false;
+    return recipientSigningStatus.some(
+      (recipient) =>
+        recipient.status && recipient.status.toLowerCase() === "declined"
+    );
+  }
   async function handleDownloadPdf() {
     console.log("carbonCopies", JSON.stringify(carbonCopies));
     pdfProcessing = true;
@@ -537,6 +549,16 @@
                         : "Pending"}
                     </span>
                   </p>
+                  {#if recipient.declinedReason}
+                    <p>
+                      <span class="font-medium">Declined Reason:</span>
+                    </p>
+                    <p
+                      class="text-red-600 break-words max-w-xs whitespace-pre-line"
+                    >
+                      {recipient.declinedReason}
+                    </p>
+                  {/if}
                   {#if recipient.sentAt}
                     <p>
                       <span class="font-medium">Sent At:</span>
