@@ -11196,6 +11196,22 @@ export let placeHolders = {
       _name: "Payment Plan",
       _case: "all",
     },
+    {
+      PlaceHolder: [
+        {
+          _name: "Textbox",
+          _datafield: "Textbox",
+          _case: "Additional",
+        },
+        {
+          _name: "Checkbox",
+          _datafield: "Checkbox",
+          _case: "Additional",
+        },
+      ],
+      _name: "Additionals",
+      _case: "Additional",
+    },
   ],
 
   get Entities() {
@@ -11246,6 +11262,9 @@ export let placeHolders = {
     parentEntity.PlaceHolder = parentEntity.PlaceHolder.filter(
       (_, i) => i != childIndex
     );
+  },
+  RemoveExcept(keepNames = []) {
+    this.data = this.data.filter(entity => keepNames.includes(entity._name));
   },
 };
 

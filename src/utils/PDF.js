@@ -181,8 +181,10 @@ export async function processPdf(
       }
     });
     // embed objects in order
-    const drawProcesses = await Promise.all(embedProcesses);
-    drawProcesses.forEach((p) => p());
+    const drawProcesses = (await Promise.all(embedProcesses)).filter(Boolean);// filter out noop/undefined functions
+    if (drawProcesses.length > 0) {
+      drawProcesses.forEach((p) => p());
+    }
   });
   await Promise.all(pagesProcesses);
   try {

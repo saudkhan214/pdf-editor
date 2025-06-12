@@ -2,6 +2,7 @@
   import { Router, Route, navigate } from "svelte-routing";
   import Home from "./Home.svelte";
   import ProcessPdf from "./ProcessPdf.svelte";
+  import ProcessExternalPdf from "./ProcessExternalPdf.svelte";
   import EditPdf from "./EditPdf.svelte";
   import { onMount } from "svelte";
   import { config } from "./utils/config";
@@ -19,6 +20,7 @@
 
   const routes = {
     process: production ? "/pdf-contracts/processpdf" : "processpdf",
+    process_ext: production ? "/pdf-contracts/processxpdf" : "processxpdf",
     edit: production
       ? "/pdf-contracts/editpdf/:resource_id"
       : "editpdf/:resource_id",
@@ -36,6 +38,7 @@
   <div>
     <Route path="/" component={Home} />
     <Route path={routes.process} component={ProcessPdf} />
+    <Route path={routes.process_ext} component={ProcessExternalPdf} />
     <Route path={routes.edit} component={EditPdf} />
   </div>
 </Router>
