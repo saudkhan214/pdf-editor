@@ -72,7 +72,6 @@
           // Return the array without signatory items
           return a.filter((x) => x.type !== "signatory");
         });
-        console.log("hasSignatory", hasSignatory);
         allObjects = metaData;
         const base64Pdf = pdfJsonData.pdf;
         const byteCharacters = atob(base64Pdf);
@@ -123,7 +122,6 @@
       const metaData = allObjects.map(
         (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
       );
-      console.log(metaData);
       //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
       let pdfBytes = await processPdf(pdfFile, metaData);
       downloadPdf(pdfBytes, "Contract.pdf");
@@ -158,7 +156,6 @@
         body: data,
       });
       var data = await res.json();
-      console.log("data", data);
       if (data.status == true) {
         if (data.redirect) {
           docSignWindow = window.open(
@@ -262,8 +259,6 @@
           )
         : objects
     );
-
-    console.log(allObjects);
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>

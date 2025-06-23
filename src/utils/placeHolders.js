@@ -11199,6 +11199,17 @@ export let placeHolders = {
     {
       PlaceHolder: [
         {
+          _name: "c_AMCPRICE",
+          _datafield: "c_AMCPRICE",
+          _case: "Additional",
+        }
+      ],
+      _name: "CustomFields",
+      _case: "CustomFields",
+    },
+    {
+      PlaceHolder: [
+        {
           _name: "Textbox",
           _datafield: "Textbox",
           _case: "Additional",

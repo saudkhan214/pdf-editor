@@ -10,7 +10,6 @@
     email: "",
     name: "",
   };
-  console.log("signatory", signatory);
   let showOptions = false; // Controls visibility of the options list
   let filteredOptions = _placeholders; // The filtered options based on user input
   let activeInput = ""; // Track the currently active input field

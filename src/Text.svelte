@@ -36,7 +36,6 @@
   }
 
   function handlePanEnd(event) {
-    console.log("enter handlePanEnd");
     if (dx === 0 && dy === 0) {
       return editable.focus();
     }
@@ -51,7 +50,6 @@
     dy = 0;
     operation = "";
 
-    console.log("end handlePanEnd");
   }
   function handlePanStart(event) {
     startX = event.detail.x;

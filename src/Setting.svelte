@@ -19,7 +19,6 @@
   $: contract.useTransaction = Boolean(contract.useTransaction);
 
   contract.branchId = contract.branchId === null ? "" : contract.branchId;
-  console.log("contract", contract);
   const dispatch = createEventDispatcher();
 
   let branches = [];

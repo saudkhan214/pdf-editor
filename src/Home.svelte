@@ -101,7 +101,6 @@
           pagesScale
         ));
 
-        console.log("pages", pages);
         selectedPageIndex = 0;
       } catch (e) {
         console.log(e);
@@ -142,7 +141,6 @@
           currentFont
         ));
 
-        console.log("pages", pages);
       }
       e.target.value = "";
     } else {
@@ -178,7 +176,6 @@
         : objects
     );
 
-    console.log(allObjects);
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>

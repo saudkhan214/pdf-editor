@@ -24,10 +24,10 @@ export async function addTextField(
   const pageHeight = viewport.height;
   var objs = allObjects[selectedPageIndex];
   var yAxis =
-    (Math.abs(window.scrollY - pageHeight) * selectedPageIndex + 45) *
+    (Math.abs(window.scrollY - pageHeight * selectedPageIndex) + 45) *
     window.devicePixelRatio;
+  // var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
-  console.log("addTextField", signatories);
   const object = {
     id,
     text,
@@ -74,7 +74,6 @@ export async function addCheckbox(
   var objs = allObjects[selectedPageIndex];
   var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
-  console.log(position);
   const object = {
     id,
     type: "checkbox",
@@ -92,7 +91,6 @@ export async function addCheckbox(
 }
 
 export async function addStamp(object, pages, selectedPageIndex, allObjects) {
-  console.log("addStamp", object);
   const stamp = {
     width: 25,
     height: 25,

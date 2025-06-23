@@ -271,7 +271,6 @@
           signatories,
           currentFont
         ));
-        console.log("allObjects", allObjects);
       }
       e.target.value = "";
     } else {

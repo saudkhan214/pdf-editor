@@ -59,7 +59,7 @@
       var pdfJsonData = await fetchPdfResource(
         entity_id,
         entity_name,
-        document_id
+        document_id,
       );
       // console.log("pdfJsonData", pdfJsonData);
       signatureProviders = pdfJsonData.signatureProviders;
@@ -74,20 +74,7 @@
         signRequested = false; //reinitiate the signing flow
       }
       resource_id = pdfJsonData.resourceId;
-      // const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
-      //   // Check if any item in the array has type === "signatory"
-      //   if (
-      //     a.some((x) => x.type === "signatory") &&
-      //     signatureProviders.length > 0
-      //   ) {
-      //     hasSignatory = true;
-      //   }
-
-      //   // Return the array without signatory items
-      //   return a.filter((x) => x.type !== "signatory");
-      // });
-      // console.log("hasSignatory", hasSignatory);
-      // allObjects = metaData;
+      
       const base64Pdf = pdfJsonData.pdf;
       const byteCharacters = atob(base64Pdf);
       const byteNumbers = new Array(byteCharacters.length)
@@ -102,7 +89,7 @@
         allObjects,
         pdfName,
         pdfFile,
-        pagesScale
+        pagesScale,
       ));
 
       await fetchFont(currentFont);
@@ -125,7 +112,7 @@
       return false;
     return recipientSigningStatus.some(
       (recipient) =>
-        recipient.status && recipient.status.toLowerCase() === "declined"
+        recipient.status && recipient.status.toLowerCase() === "declined",
     );
   }
   async function handleDownloadPdf() {
@@ -141,17 +128,23 @@
     }
   }
   async function sendForSignature() {
+    pdfProcessing = true;
     const hasSignatoryInObjects = allObjects.some((pageObjects) =>
-      pageObjects.some((obj) => obj.type === "signatory")
+      pageObjects.some((obj) => obj.type === "signatory"),
     );
     if (!hasSignatoryInObjects) {
       alert(
-        "Please add at least one signatory to the document before sending for signature."
+        "Please add at least one signatory to the document before sending for signature.",
       );
       return;
     }
 
     try {
+      var saved = await savePdfMetadata();
+      if (!saved) {
+        throw new Error("Failed to save pdf metadata");
+      }
+
       //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
       let pdfBytes = await processPdf(pdfFile, allObjects);
       const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -172,13 +165,12 @@
         body: data,
       });
       var data = await res.json();
-      console.log("data", data);
       if (data.status == true) {
         if (data.redirect) {
           docSignWindow = window.open(
             data.redirect,
             "PDF Signature",
-            "width=400,height=600"
+            "width=400,height=600",
           );
           if (docSignWindow) {
             docSignWindow.focus();
@@ -189,7 +181,7 @@
           alert(
             data.message +
               " \n" +
-              "Please wait for couple of minutes then check your email"
+              "Please wait for couple of minutes then check your email",
           );
         }
       } else {
@@ -204,6 +196,22 @@
     }
   }
 
+  async function savePdfMetadata() {
+    const baseUrl = `${config.API_HOST}/contract/save-pdf-metadata`;
+
+    var data = new FormData();
+    data.append("entityName", entity_name);
+    data.append("entityId", entity_id);
+    data.append("resourceId", resource_id);
+    data.append("metaData", JSON.stringify(allObjects));
+
+    var res = await fetch(baseUrl, {
+      method: "POST",
+      body: data,
+    });
+
+    return res.ok;
+  }
   function handleMessage(event) {
     // Optional: add origin check for security
     if (event.origin !== config.API_HOST.replace("/api", "")) {
@@ -228,7 +236,7 @@
       `${config.API_HOST}/contract/get-xpdf?entity_name=${entity_name}&entity_id=${entity_id}&document_id=${doc_id}`,
       {
         method: "GET",
-      }
+      },
     );
     var text = await res.text();
     if (!res.ok) {
@@ -250,18 +258,17 @@
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.map((object) =>
-            object.id === objectId ? { ...object, ...payload } : object
+            object.id === objectId ? { ...object, ...payload } : object,
           )
-        : objects
+        : objects,
     );
 
-    console.log(allObjects);
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.filter((object) => object.id !== objectId)
-        : objects
+        : objects,
     );
   }
   async function selectFontFamily(event) {
@@ -334,7 +341,7 @@
       let signatory = signatories[i];
       if (!signatory.email || !signatory.name) {
         alert(
-          `Please fill out both the email and name for signatory #${i + 1}`
+          `Please fill out both the email and name for signatory #${i + 1}`,
         );
         return; // Stop function if validation fails
       }
@@ -376,7 +383,7 @@
           e.target,
           pages,
           selectedPageIndex,
-          allObjects
+          allObjects,
         ));
       } else {
         ({ pages, allObjects } = await addTextField(
@@ -385,10 +392,9 @@
           selectedPageIndex,
           allObjects,
           signatories,
-          currentFont
+          currentFont,
         ));
 
-        console.log("pages", pages);
       }
       e.target.value = "";
     } else {
@@ -406,7 +412,7 @@
                   ? object.signatory.stamps
                   : []
               ).map((stamp, index) =>
-                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp
+                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp,
               );
 
               return {
@@ -419,7 +425,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
 
@@ -431,7 +437,7 @@
               const stamps =
                 object.signatory && Array.isArray(object.signatory.stamps)
                   ? object.signatory.stamps.filter(
-                      (_, index) => index !== stampIndex
+                      (_, index) => index !== stampIndex,
                     )
                   : [];
 
@@ -445,7 +451,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
   async function handleStamp(object) {
@@ -453,7 +459,7 @@
       object,
       pages,
       selectedPageIndex,
-      allObjects
+      allObjects,
     ));
   }
 </script>
@@ -495,31 +501,34 @@
       class="fixed z-10 top-0 left-0 right-0 h-20 flex justify-center items-center
       bg-white"
     >
-      <div class="flex flex-col justify-center md:mr-4">
-        <label class="md:mr-2">Entities</label>
-        <select on:change={entityChange} class="p-1 rounded-xs border">
-          <option disabled selected>--Select--</option>
-          {#each placeHolders.Entities as entity, i (entity)}
-            <option value={entity}>{entity}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="flex flex-col justify-center md:mr-4">
-        <label class="md:mr-2">PlaceHolders</label>
-        <select on:change={placeHolderChange} class="p-1 rounded-xs border">
-          <option disabled selected>--Select--</option>
-          {#if _placeholders.length > 0}
-            {#each _placeholders as _placeholder, i (_placeholder)}
-              {#if _placeholder._name}
-                <option
-                  data-obj={JSON.stringify(_placeholder)}
-                  value={_placeholder._name}>{_placeholder._name}</option
-                >
-              {/if}
+      {#if !signRequested}
+        <div class="flex flex-col justify-center md:mr-4">
+          <label class="md:mr-2">Entities</label>
+          <select on:change={entityChange} class="p-1 rounded-xs border">
+            <option disabled selected>--Select--</option>
+            {#each placeHolders.Entities as entity, i (entity)}
+              <option value={entity}>{entity}</option>
             {/each}
-          {/if}
-        </select>
-      </div>
+          </select>
+        </div>
+        <div class="flex flex-col justify-center md:mr-4">
+          <label class="md:mr-2">PlaceHolders</label>
+          <select on:change={placeHolderChange} class="p-1 rounded-xs border">
+            <option disabled selected>--Select--</option>
+            {#if _placeholders.length > 0}
+              {#each _placeholders as _placeholder, i (_placeholder)}
+                {#if _placeholder._name}
+                  <option
+                    data-obj={JSON.stringify(_placeholder)}
+                    value={_placeholder._name}>{_placeholder._name}</option
+                  >
+                {/if}
+              {/each}
+            {/if}
+          </select>
+        </div>
+      {/if}
+
       <button
         on:click={handleDownloadPdf}
         disabled={pdfProcessing}
@@ -687,6 +696,43 @@
                 </svg>
               </button>
             </div>
+
+            <div
+              class="w-full max-w-sm bg-white shadow-md rounded-lg border border-gray-200 p-4 space-y-4"
+            >
+              <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                Signatories
+              </h5>
+              <div class="grid grid-cols-1 gap-2">
+                {#each signatories as signatory, index}
+                  <Recipient
+                    {index}
+                    on:remove={() => removeSignatory(index)}
+                    on:handle_input={(e) => handleSignatoryInput(e, index)}
+                  />
+                {/each}
+              </div>
+
+              <button type="button" class="float-end" on:click={addSignatory}>
+                <svg
+                  class="w-5 h-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    fill="#1f7bc1"
+                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+                  ></path><path fill="#fff" d="M21,14h6v20h-6V14z"></path><path
+                    fill="#fff"
+                    d="M14,21h20v6H14V21z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
           {/if}
           {#if recipientSigningStatus}
             <div
@@ -741,43 +787,6 @@
               {/each}
             </div>
           {/if}
-
-          <div
-            class="w-full max-w-sm bg-white shadow-md rounded-lg border border-gray-200 p-4 space-y-4"
-          >
-            <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-              Signatories
-            </h5>
-            <div class="grid grid-cols-1 gap-2">
-              {#each signatories as signatory, index}
-                <Recipient
-                  {index}
-                  on:remove={() => removeSignatory(index)}
-                  on:handle_input={(e) => handleSignatoryInput(e, index)}
-                />
-              {/each}
-            </div>
-
-            <button type="button" class="float-end" on:click={addSignatory}>
-              <svg
-                class="w-5 h-5"
-                xmlns="http://www.w3.org/2000/svg"
-                x="0px"
-                y="0px"
-                width="48"
-                height="48"
-                viewBox="0 0 48 48"
-              >
-                <path
-                  fill="#1f7bc1"
-                  d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-                ></path><path fill="#fff" d="M21,14h6v20h-6V14z"></path><path
-                  fill="#fff"
-                  d="M14,21h20v6H14V21z"
-                ></path>
-              </svg>
-            </button>
-          </div>
         </div>
       </div>
     {:else}
