@@ -18,6 +18,8 @@
   $: contract.propertyId = String(contract.propertyId);
   $: contract.useTransaction = Boolean(contract.useTransaction);
 
+  $: isEditing = contract.id !== 0;
+
   contract.branchId = contract.branchId === null ? "" : contract.branchId;
   const dispatch = createEventDispatcher();
 
@@ -65,42 +67,13 @@
     }
 
     var tag = contract;
-    // let signatories = [];
-    // const formData = new FormData(e.target);
-    // for (let field of formData) {
-    //   const [key, value] = field;
-
-    //   // Check if the key belongs to the 'signatory' fields
-    //   if (key.startsWith("signatory[")) {
-    //     // Extract the index and field (email or name) using a regular expression
-    //     const match = key.match(/signatory\[(\d+)\]\.(email|name)/);
-    //     if (match) {
-    //       const index = match[1]; // The signatory index
-    //       const fieldName = match[2]; // The field name (email or name)
-
-    //       // Ensure there's an object for this signatory
-    //       if (!signatories[index]) {
-    //         signatories[index] = {};
-    //       }
-
-    //       // Assign the value to the correct field (email or name) of the corresponding signatory
-    //       signatories[index][fieldName] = value;
-    //     }
-    //   }
-    //   // else {
-    //   //   // For other non-signatory fields, continue adding them normally to the 'tag' object
-    //   //   // if (key == "branch_id" || key == "property_reference") {
-    //   //   //   continue;
-    //   //   // }
-
-    //   //   tag[key] = value;
-    //   // }
-    // }
-
     tag["country"] = getCountryId();
     dispatch("finish", tag);
   }
 
+  function copyContract() {
+    dispatch("copy", contract);
+  }
   function handleFileChange(e) {
     contract = {
       ...contract, // Clone the existing state
@@ -248,10 +221,20 @@
         <button
           type="submit"
           class="w-24 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-4
-              rounded"
+              rounded mr-4"
         >
           Done
         </button>
+        {#if isEditing}
+          <button
+            type="button"
+            on:click={copyContract}
+            class="w-24 bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-4
+              rounded"
+          >
+            Copy
+          </button>
+        {/if}
       </div>
     </div>
 

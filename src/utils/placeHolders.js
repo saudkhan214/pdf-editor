@@ -2421,6 +2421,26 @@ export let placeHolders = {
           _datafield: "RepresentativeEmiratesExpiryDate",
           _case: "Contract",
         },
+        {
+          _name: "Trade Licence Number Expiry Date",
+          _datafield: "GetBuyerLicenseExpiryDate",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Trade Licence Number Expiry Date",
+          _datafield: "GetBuyerLicenseExpiryDate",
+          _case: "Contract",
+        },
+        {
+          _name: "Trade Licence Number Expiry Date",
+          _datafield: "GetBuyerLicenseExpiryDate",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Trade Licence Number Expiry Date",
+          _datafield: "GetBuyerLicenseExpiryDate",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "Buyer",
       _case: "Reservationform",
@@ -3545,6 +3565,26 @@ export let placeHolders = {
           _datafield: "JointBuyerRepresentativeNameArabic",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer Date of Birth",
+          _datafield: "JointBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer Date of Birth",
+          _datafield: "JointBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer Date of Birth",
+          _datafield: "JointBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer Date of Birth",
+          _datafield: "JointBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "JointBuyer",
       _case: "Reservationform",
@@ -4096,6 +4136,26 @@ export let placeHolders = {
           _datafield: "thirdBuyerRepresentativeNameArabic",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 2 Date of Birth",
+          _datafield: "thirdBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 2 Date of Birth",
+          _datafield: "thirdBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 2 Date of Birth",
+          _datafield: "thirdBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 2 Date of Birth",
+          _datafield: "thirdBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "JointBuyer2",
       _case: "Reservationform",
@@ -4627,6 +4687,26 @@ export let placeHolders = {
           _datafield: "fourthBuyerRepresentativePassportNumber",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 3 Date of Birth",
+          _datafield: "fourthBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 3 Date of Birth",
+          _datafield: "fourthBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 3 Date of Birth",
+          _datafield: "fourthBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 3 Date of Birth",
+          _datafield: "fourthBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "JointBuyer3",
       _case: "Reservationform",
@@ -5138,6 +5218,26 @@ export let placeHolders = {
           _datafield: "fifthBuyerRepresentativePassportNumber",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 4 Date of Birth",
+          _datafield: "fifthBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 4 Date of Birth",
+          _datafield: "fifthBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 4 Date of Birth",
+          _datafield: "fifthBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 4 Date of Birth",
+          _datafield: "fifthBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "JointBuyer4",
       _case: "Reservationform",
@@ -5644,6 +5744,26 @@ export let placeHolders = {
           _datafield: "sixthBuyerRepresentativePassportNumber",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 5 Date of Birth",
+          _datafield: "sixthBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 5 Date of Birth",
+          _datafield: "sixthBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 5 Date of Birth",
+          _datafield: "sixthBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 5 Date of Birth",
+          _datafield: "sixthBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        },
       ],
       _name: "JointBuyer5",
       _case: "Reservationform",
@@ -6098,6 +6218,26 @@ export let placeHolders = {
         {
           _name: "Joint Buyer 6 Representative Passport Number",
           _datafield: "seventhBuyerRepresentativePassportNumber",
+          _case: "TermsAndCondition",
+        },
+        {
+          _name: "Joint Buyer 6 Date of Birth",
+          _datafield: "seventhBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 6 Date of Birth",
+          _datafield: "seventhBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 6 Date of Birth",
+          _datafield: "seventhBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 6 Date of Birth",
+          _datafield: "seventhBuyerDateOfBirth",
           _case: "TermsAndCondition",
         },
       ],
@@ -6556,6 +6696,24 @@ export let placeHolders = {
           _datafield: "eightBuyerRepresentativePassportNumber",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 7 Date of Birth",
+          _datafield: "eightBuyerDateOfBirth",
+          _case: "Reservationform",
+        }, {
+          _name: "Joint Buyer 7 Date of Birth",
+          _datafield: "eightBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 7 Date of Birth",
+          _datafield: "eightBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        }, {
+          _name: "Joint Buyer 7 Date of Birth",
+          _datafield: "eightBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        }
       ],
       _name: "JointBuyer7",
       _case: "Reservationform",
@@ -7012,6 +7170,25 @@ export let placeHolders = {
           _datafield: "ninthBuyerRepresentativePassportNumber",
           _case: "TermsAndCondition",
         },
+        {
+          _name: "Joint Buyer 8 Date of Birth",
+          _datafield: "ninthBuyerDateOfBirth",
+          _case: "Reservationform",
+        }, {
+          _name: "Joint Buyer 8 Date of Birth",
+          _datafield: "ninthBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 8 Date of Birth",
+          _datafield: "ninthBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 8 Date of Birth",
+          _datafield: "ninthBuyerDateOfBirth",
+          _case: "TermsAndCondition",
+        }
       ],
       _name: "JointBuyer8",
       _case: "Reservationform",
@@ -7466,6 +7643,26 @@ export let placeHolders = {
         {
           _name: "Joint Buyer 9 Representative Passport Number",
           _datafield: "tenthBuyerRepresentativePassportNumber",
+          _case: "TermsAndCondition",
+        },
+        {
+          _name: "Joint Buyer 9 Date of Birth",
+          _datafield: "tenthBuyerDateOfBirth",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Joint Buyer 9 Date of Birth",
+          _datafield: "tenthBuyerDateOfBirth",
+          _case: "Contract",
+        },
+        {
+          _name: "Joint Buyer 9 Date of Birth",
+          _datafield: "tenthBuyerDateOfBirth",
+          _case: "LeaseRenewalLetter",
+        },
+        {
+          _name: "Joint Buyer 9 Date of Birth",
+          _datafield: "tenthBuyerDateOfBirth",
           _case: "TermsAndCondition",
         },
       ],

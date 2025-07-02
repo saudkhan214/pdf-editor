@@ -22,7 +22,7 @@
     addImage,
     addStamp,
   } from "./utils/sharedFunctions.js";
-  import { edit } from "./utils/PDF.js";
+  import { edit, copy } from "./utils/PDF.js";
   import Setting from "./Setting.svelte";
   import { config } from "./utils/config";
   export let resource_id;
@@ -77,7 +77,7 @@
           _signatories.reduce((acc, signatory) => {
             acc[signatory.email] = signatory; // overwrites duplicates, keeps one
             return acc;
-          }, {})
+          }, {}),
         );
         if (signatories.length === 0) {
           signatories = [{}];
@@ -109,7 +109,7 @@
           allObjects,
           pdfName,
           pdfFile,
-          pagesScale
+          pagesScale,
         ));
         await fetchFont(currentFont);
         prepareAssets();
@@ -127,7 +127,7 @@
       `${config.API_HOST}/contract/get-pdf?resource_id=${id}`,
       {
         method: "GET",
-      }
+      },
     );
     if (!res.ok && res.status === 401) {
       // Handle 401 Unauthorized error
@@ -141,7 +141,7 @@
       let signatory = signatories[i];
       if (!signatory.email || !signatory.name) {
         alert(
-          `Please fill out both the email and name for signatory #${i + 1}`
+          `Please fill out both the email and name for signatory #${i + 1}`,
         );
         return; // Stop function if validation fails
       }
@@ -181,7 +181,7 @@
         allObjects,
         pdfName,
         pdfFile,
-        pagesScale
+        pagesScale,
       ));
       selectedPageIndex = 0;
     } catch (e) {
@@ -260,7 +260,7 @@
           e.target,
           pages,
           selectedPageIndex,
-          allObjects
+          allObjects,
         ));
       } else {
         ({ pages, allObjects } = await addTextField(
@@ -269,7 +269,7 @@
           selectedPageIndex,
           allObjects,
           signatories,
-          currentFont
+          currentFont,
         ));
       }
       e.target.value = "";
@@ -356,16 +356,16 @@
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.map((object) =>
-            object.id === objectId ? { ...object, ...payload } : object
+            object.id === objectId ? { ...object, ...payload } : object,
           )
-        : objects
+        : objects,
     );
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.filter((object) => object.id !== objectId)
-        : objects
+        : objects,
     );
   }
 
@@ -379,7 +379,7 @@
                   ? object.signatory.stamps
                   : []
               ).map((stamp, index) =>
-                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp
+                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp,
               );
 
               return {
@@ -392,7 +392,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
 
@@ -404,7 +404,7 @@
               const stamps =
                 object.signatory && Array.isArray(object.signatory.stamps)
                   ? object.signatory.stamps.filter(
-                      (_, index) => index !== stampIndex
+                      (_, index) => index !== stampIndex,
                     )
                   : [];
 
@@ -418,7 +418,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
 
@@ -437,8 +437,26 @@
         pdfFile,
         allObjects,
         tags,
-        contractInfo.id
+        contractInfo.id,
       );
+      if (result.success) {
+        alert(result.msg);
+        navigate("/", { replace: true });
+      } else {
+        alert(result.error);
+      }
+    } catch (e) {
+      console.log(e);
+      alert(e.message);
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function copyPDF(contract) {
+    try {
+      saving = true;
+      var result = await copy(contract);
       if (result.success) {
         alert(result.msg);
         navigate("/", { replace: true });
@@ -457,7 +475,7 @@
       object,
       pages,
       selectedPageIndex,
-      allObjects
+      allObjects,
     ));
   }
 </script>
@@ -562,7 +580,7 @@
             originWidth,
             originHeight,
             path,
-            scale
+            scale,
           );
           addingDrawing = false;
         }}
@@ -585,6 +603,10 @@
         on:finish={async (e) => {
           openSaveDialogue = false;
           await savePDF(e.detail);
+        }}
+        on:copy={async (e) => {
+          openSaveDialogue = false;
+          await copyPDF(e.detail);
         }}
       />
     </div>

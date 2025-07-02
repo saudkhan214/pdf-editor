@@ -51,6 +51,26 @@ export async function edit(resource_id, pdfFile, objects, tags, contract_id) {
     return { error: ex.message, success: false };
   }
 }
+export async function copy(contract) {
+  var data = new FormData();
+  data.append("resourceId", contract.esignTemplateId);
+  data.append("module", contract.module);
+  try {
+    var res = await fetch(`${config.API_HOST}/contract/copy-pdf`, {
+      method: "POST",
+      body: data,
+    });
+    const json = await res.json();
+    if (res.status != 200) {
+      console.log(json);
+      return { error: json.error, success: false };
+    }
+    return { msg: `Pdf copied with resource Id :${json.resource_id}`, success: true };
+  } catch (ex) {
+    console.log(ex);
+    return { error: ex.message, success: false };
+  }
+}
 export function downloadPdf(pdfBytes, name) {
   download(pdfBytes, name, "application/pdf");
 }
