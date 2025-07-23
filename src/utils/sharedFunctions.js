@@ -33,7 +33,7 @@ export async function addTextField(
     text,
     type: "text",
     lines: [text],
-    size: 16,
+    size: 12,
     width: 0, // recalculate after editing
     lineHeight: 1.4,
     fontWeight: 100,
