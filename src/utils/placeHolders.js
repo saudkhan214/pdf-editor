@@ -452,6 +452,14 @@ export let placeHolders = {
           _datafield: "ListingAgentSignature",
           _case: "Contract",
         },
+        {
+          _name: "Service Charges",
+          _datafield: "ListingServiceCharges"
+        },
+        {
+          _name: "Administration Charges",
+          _datafield: "ListingAdministrationCharges"
+        }
       ],
       _name: "Unit",
       _case: "all",
@@ -11396,33 +11404,6 @@ export let placeHolders = {
     {
       PlaceHolder: [
         {
-          _name: "c_AMCPRICE",
-          _datafield: "c_AMCPRICE",
-          _case: "Additional",
-        }
-      ],
-      _name: "CustomFields",
-      _case: "CustomFields",
-    },
-    {
-      PlaceHolder: [
-        {
-          _name: "Textbox",
-          _datafield: "Textbox",
-          _case: "Additional",
-        },
-        {
-          _name: "Checkbox",
-          _datafield: "Checkbox",
-          _case: "Additional",
-        },
-      ],
-      _name: "Additionals",
-      _case: "Additional",
-    },
-    {
-      PlaceHolder: [
-        {
           _name: "1st Berth Parking Name",
           _datafield: "1stBerthParkingName",
           _case: "Reservationform"
@@ -15425,6 +15406,33 @@ export let placeHolders = {
       ],
       _name: "Berth Parking",
       _case: "Contract"
+    },
+    {
+      PlaceHolder: [
+        {
+          _name: "c_AMCPRICE",
+          _datafield: "c_AMCPRICE",
+          _case: "Additional",
+        }
+      ],
+      _name: "CustomFields",
+      _case: "CustomFields",
+    },
+    {
+      PlaceHolder: [
+        {
+          _name: "Textbox",
+          _datafield: "Textbox",
+          _case: "Additional",
+        },
+        {
+          _name: "Checkbox",
+          _datafield: "Checkbox",
+          _case: "Additional",
+        },
+      ],
+      _name: "Additionals",
+      _case: "Additional",
     }
   ],
 
