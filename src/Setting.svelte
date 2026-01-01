@@ -6,6 +6,7 @@
     templateName: "",
     module: "",
     branchId: "",
+    countryId: 0,
     propertyId: "",
     zone: "",
     status: "512",
@@ -15,6 +16,7 @@
   $: contract.zone = String(contract.zone);
   $: contract.status = String(contract.status);
   $: contract.branchId = String(contract.branchId);
+  $: contract.countryId = Number(contract.countryId);
   $: contract.propertyId = String(contract.propertyId);
   $: contract.useTransaction = Boolean(contract.useTransaction);
 
@@ -24,6 +26,7 @@
   const dispatch = createEventDispatcher();
 
   let branches = [];
+  let countries = [];
   let showStatus = true;
 
   onMount(() => {
@@ -47,6 +50,14 @@
     if (contract.zone != "2") {
       showStatus = false;
     }
+
+    getGroupCountries().then((data) => {
+      console.log("Group Countries:", data);
+      countries = data;
+    }).catch((error) => {
+      console.error("Error fetching group countries:", error);
+      alert("Error fetching group countries");
+    });
   });
   // let signatories = [{}];
   function cancel(e) {
@@ -60,6 +71,7 @@
       contract.templateName == "" ||
       contract.module == "" ||
       contract.zone == "" ||
+      contract.countryId == 0 ||
       (contract.zone == "2" && contract.status == "")
     ) {
       alert("Fill the required fields");
@@ -67,7 +79,7 @@
     }
 
     var tag = contract;
-    tag["country"] = getCountryId();
+    // tag["country"] = contract.countryId;
     dispatch("finish", tag);
   }
 
@@ -84,19 +96,34 @@
     showStatus = e.target.value === "2";
   }
 
-  function getCountryId() {
-    try {
-      return parseInt(opener.parent.application.context.get_countryId());
-    } catch (error) {
-      return 65946;
-    }
-  }
+  // function getCountryId() {
+  //   try {
+  //     return parseInt(opener.parent.application.context.get_countryId());
+  //   } catch (error) {
+  //     return 65946;
+  //   }
+  // }
 
-  function addSignatory() {
-    signatories = [...signatories, {}];
-  }
-  function removeSignatory(index) {
-    signatories = signatories.filter((_, i) => i !== index);
+  function getGroupCountries() {
+    return new Promise((resolve, reject) => {
+      fetch(config.API_HOST + "/group-countries", {
+      method: "GET",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        resolve(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching group countries:", error);
+        reject(error);
+      });
+    });
+    
   }
 </script>
 
@@ -147,12 +174,24 @@
         {:else}
           <p>Loading branches...</p>
         {/if}
-        <!-- <input
-          class="bg-white p-1 rounded-xs border mt-1 w-full"
-          name="branchId"
-          type="number"
-          bind:value={contract.branchId}
-        /> -->
+      </div>
+
+      <div class="flex flex-col">
+        <label class="font-semibold text-xs">Country</label>
+        {#if countries.length}
+          <select
+            class="bg-white p-1 rounded-xs border mt-1 w-full"
+            name="countryId"
+            bind:value={contract.countryId}
+          >
+            <option disabled value="">--Select--</option>
+            {#each countries as country}
+              <option value={Number(country.id)}>{country.name}</option>
+            {/each}
+          </select>
+        {:else}
+          <p>Loading countries...</p>
+        {/if}
       </div>
 
       <div class="flex flex-col">

@@ -98,7 +98,7 @@
       {#each _placeholders as option}
         <li
           class="px-4 py-2 cursor-pointer hover:bg-gray-200"
-          on:click={() => selectOption(option._datafield)}
+          on:click={() => selectOption(option._name)}
         >
           {option._name}
         </li>

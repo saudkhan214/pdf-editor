@@ -45,7 +45,7 @@
         var pdfJsonData = await fetchPdfResource(
           resource_id,
           entity_id,
-          entity_name
+          entity_name,
         );
         // console.log("pdfJsonData", pdfJsonData);
         signatureProviders = pdfJsonData.signatureProviders;
@@ -57,7 +57,7 @@
         recipientSigningStatus = pdfJsonData.recipientSigningStatus;
         var declined = declinedBySignatory(recipientSigningStatus);
         if (declined) {
-          signRequested = false;//reinitiate the signing flow
+          signRequested = false; //reinitiate the signing flow
         }
         contract = pdfJsonData.contract;
         const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
@@ -70,7 +70,7 @@
           }
 
           // Return the array without signatory items
-          return a.filter((x) => x.type !== "signatory");
+          return a; //.filter((x) => x.type !== "signatory");
         });
         allObjects = metaData;
         const base64Pdf = pdfJsonData.pdf;
@@ -87,7 +87,7 @@
           allObjects,
           pdfName,
           pdfFile,
-          pagesScale
+          pagesScale,
         ));
 
         await fetchFont(currentFont);
@@ -113,14 +113,14 @@
       return false;
     return recipientSigningStatus.some(
       (recipient) =>
-        recipient.status && recipient.status.toLowerCase() === "declined"
+        recipient.status && recipient.status.toLowerCase() === "declined",
     );
   }
   async function handleDownloadPdf() {
     pdfProcessing = true;
     try {
       const metaData = allObjects.map(
-        (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
+        (a) => a.filter((x) => x.text != "Textbox"), //ignore the Textbox fields
       );
       //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
       let pdfBytes = await processPdf(pdfFile, metaData);
@@ -135,7 +135,7 @@
   async function sendForSignature() {
     pdfProcessing = true;
     const metaData = allObjects.map(
-      (a) => a.filter((x) => x.text != "Textbox") //ignore the Textbox fields
+      (a) => a.filter((x) => x.text != "Textbox"), //ignore the Textbox fields
     );
     try {
       //refector the processPdf, the pupose of processPdf should only be process the pdf and return the blob
@@ -161,7 +161,7 @@
           docSignWindow = window.open(
             data.redirect,
             "PDF Signature",
-            "width=400,height=600"
+            "width=400,height=600",
           );
           if (docSignWindow) {
             docSignWindow.focus();
@@ -172,7 +172,7 @@
           alert(
             data.message +
               " \n" +
-              "Please wait for couple of minutes then check your email"
+              "Please wait for couple of minutes then check your email",
           );
         }
       } else {
@@ -211,7 +211,7 @@
       `${config.API_HOST}/contract/get-pdf?resource_id=${id}&entity_name=${entity_name}&entity_id=${entity_id}`,
       {
         method: "GET",
-      }
+      },
     );
     var text = await res.text();
     if (!res.ok) {
@@ -255,16 +255,16 @@
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.map((object) =>
-            object.id === objectId ? { ...object, ...payload } : object
+            object.id === objectId ? { ...object, ...payload } : object,
           )
-        : objects
+        : objects,
     );
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.filter((object) => object.id !== objectId)
-        : objects
+        : objects,
     );
   }
   async function selectFontFamily(event) {
@@ -444,7 +444,7 @@
                   {#each allObjects[pIndex] as object (object.id)}
                     {#if object.type === "image"}
                       <div></div>
-                    {:else if object.type === "text" || object.type === "signatory"}
+                    {:else if object.type === "text"}
                       <Text
                         on:update={(e) => updateObject(object.id, e.detail)}
                         on:delete={() => deleteObject(object.id)}
