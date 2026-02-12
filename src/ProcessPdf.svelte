@@ -9,6 +9,8 @@
   import Tailwind from "./Tailwind.svelte";
   import { addPDF, validateEmail } from "./utils/sharedFunctions.js";
   import Recipient from "./Recipient.svelte";
+  import ZoomControls from "./ZoomControls.svelte";
+  let zoom = 1;
   let pageLoaded = false;
   let pdfProcessing = false;
   let allObjects = [];
@@ -107,6 +109,10 @@
   onDestroy(() => {
     window.removeEventListener("message", handleMessage);
   });
+
+  function setZoom(value) {
+    zoom = value;
+  }
 
   function declinedBySignatory(recipientSigningStatus) {
     if (!recipientSigningStatus || !Array.isArray(recipientSigningStatus))
@@ -380,6 +386,8 @@
       >
         Download
       </button>
+      <ZoomControls {zoom} onZoomChange={setZoom} />
+
       {#if hasSignatory && !signRequested && signatureProviders.length > 0}
         <button
           on:click={sendForSignature}
@@ -432,6 +440,7 @@
                 class:shadow-outline={pIndex === selectedPageIndex}
               >
                 <PDFPage
+                  scale={zoom}
                   on:measure={(e) => onMeasure(e.detail.scale, pIndex)}
                   {page}
                 />
@@ -457,7 +466,7 @@
                         fontColor={object.fontColor}
                         fontFamily={object.fontFamily}
                         fontWeight={object.fontWeight}
-                        pageScale={pagesScale[pIndex]}
+                        pageScale={zoom}
                       />
                     {:else if object.type === "checkbox"}
                       <Checkbox
@@ -465,7 +474,7 @@
                         on:delete={() => deleteObject(object.id)}
                         x={object.x}
                         y={object.y}
-                        pageScale={pagesScale[pIndex]}
+                        pageScale={zoom}
                         isChecked={object.checked}
                       />
                     {:else if object.type === "drawing"}

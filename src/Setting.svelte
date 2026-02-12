@@ -6,7 +6,7 @@
     templateName: "",
     module: "",
     branchId: "",
-    countryId: 0,
+    countryId: "",
     propertyId: "",
     zone: "",
     status: "512",
@@ -16,7 +16,7 @@
   $: contract.zone = String(contract.zone);
   $: contract.status = String(contract.status);
   $: contract.branchId = String(contract.branchId);
-  $: contract.countryId = Number(contract.countryId);
+  $: contract.countryId = String(contract.countryId);
   $: contract.propertyId = String(contract.propertyId);
   $: contract.useTransaction = Boolean(contract.useTransaction);
 
@@ -30,6 +30,8 @@
   let showStatus = true;
 
   onMount(() => {
+  console.log("contract", contract);
+
     fetch(config.API_HOST + "/branches", {
       method: "GET",
     })
@@ -51,13 +53,15 @@
       showStatus = false;
     }
 
-    getGroupCountries().then((data) => {
-      console.log("Group Countries:", data);
-      countries = data;
-    }).catch((error) => {
-      console.error("Error fetching group countries:", error);
-      alert("Error fetching group countries");
-    });
+    getGroupCountries()
+      .then((data) => {
+        console.log("Group Countries:", data);
+        countries = data;
+      })
+      .catch((error) => {
+        console.error("Error fetching group countries:", error);
+        alert("Error fetching group countries");
+      });
   });
   // let signatories = [{}];
   function cancel(e) {
@@ -79,7 +83,7 @@
     }
 
     var tag = contract;
-    // tag["country"] = contract.countryId;
+    tag["countryId"] = Number(contract.countryId);
     dispatch("finish", tag);
   }
 
@@ -107,23 +111,22 @@
   function getGroupCountries() {
     return new Promise((resolve, reject) => {
       fetch(config.API_HOST + "/group-countries", {
-      method: "GET",
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
+        method: "GET",
       })
-      .then((data) => {
-        resolve(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching group countries:", error);
-        reject(error);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          resolve(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching group countries:", error);
+          reject(error);
+        });
     });
-    
   }
 </script>
 
@@ -177,7 +180,7 @@
       </div>
 
       <div class="flex flex-col">
-        <label class="font-semibold text-xs">Country</label>
+        <label class="font-semibold text-xs">Country *</label>
         {#if countries.length}
           <select
             class="bg-white p-1 rounded-xs border mt-1 w-full"
@@ -186,7 +189,7 @@
           >
             <option disabled value="">--Select--</option>
             {#each countries as country}
-              <option value={Number(country.id)}>{country.name}</option>
+              <option value={String(country.id)}>{country.name}</option>
             {/each}
           </select>
         {:else}

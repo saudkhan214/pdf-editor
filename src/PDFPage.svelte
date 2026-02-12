@@ -1,41 +1,64 @@
 <script>
-  import { onMount, onDestroy, createEventDispatcher } from "svelte";
+  import { onMount, onDestroy } from "svelte";
+
   export let page;
-  const dispatch = createEventDispatcher();
+  export let scale = 1;
+
   let canvas;
-  let width;
-  let height;
-  let clientWidth;
-  let mounted;
-  function measure() {
-    dispatch("measure", {
-      scale: canvas.clientWidth / width
-    });
-  }
+  let renderTask;
+  let mounted = false;
+  let destroyed = false;
+
   async function render() {
-    const _page = await page;
+    if (!mounted || !canvas || !page || destroyed) return;
+
+    // Cancel previous render
+    if (renderTask) {
+      renderTask.cancel();
+      renderTask = null;
+    }
+
+    const pdfPage = await page;
+    if (destroyed) return;
+
     const context = canvas.getContext("2d");
-    const viewport = _page.getViewport({ scale: 1, rotation: 0 });
-    width = viewport.width;
-    height = viewport.height;
-    await _page.render({
+    const viewport = pdfPage.getViewport({ scale });
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width = `${viewport.width}px`;
+    canvas.style.height = `${viewport.height}px`;
+
+    renderTask = pdfPage.render({
       canvasContext: context,
       viewport
-    }).promise;
-    measure();
-    window.addEventListener("resize", measure);
+    });
+
+    try {
+      await renderTask.promise;
+    } catch (err) {
+      if (err.name !== "RenderingCancelledException") {
+        console.error(err);
+      }
+    }
   }
-  onMount(render);
+
+  onMount(() => {
+    mounted = true;
+    render(); // ✅ force first render
+  });
+
+  // ✅ re-render when scale OR page changes
+  $: if (mounted && scale && page) {
+    render();
+  }
+
   onDestroy(() => {
-    window.removeEventListener("resize", measure);
+    destroyed = true;
+    renderTask.cancel();
   });
 </script>
 
 <div>
-  <canvas
-    bind:this={canvas}
-    class="max-w-full"
-    style="width: {width}px;"
-    {width}
-    {height} />
+  <canvas bind:this={canvas} class="max-w-full" />
 </div>

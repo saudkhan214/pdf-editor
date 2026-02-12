@@ -625,6 +625,7 @@
               class:shadow-outline={pIndex === selectedPageIndex}
             >
               <PDFPage
+                scale={pagesScale[pIndex]}
                 on:measure={(e) => onMeasure(e.detail.scale, pIndex)}
                 {page}
               />

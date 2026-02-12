@@ -17,6 +17,8 @@
   } from "./utils/sharedFunctions.js";
   import { placeHolders } from "./utils/placeHolders";
   import Recipient from "./Recipient.svelte";
+  import ZoomControls from "./ZoomControls.svelte";
+  let zoom = 1;
   let pageLoaded = false;
   let selectedEntity;
   let pdfProcessing = false;
@@ -74,7 +76,7 @@
         signRequested = false; //reinitiate the signing flow
       }
       resource_id = pdfJsonData.resourceId;
-      
+
       const base64Pdf = pdfJsonData.pdf;
       const byteCharacters = atob(base64Pdf);
       const byteNumbers = new Array(byteCharacters.length)
@@ -106,6 +108,9 @@
   onDestroy(() => {
     window.removeEventListener("message", handleMessage);
   });
+  function setZoom(value) {
+    zoom = value;
+  }
 
   function declinedBySignatory(recipientSigningStatus) {
     if (!recipientSigningStatus || !Array.isArray(recipientSigningStatus))
@@ -262,7 +267,6 @@
           )
         : objects,
     );
-
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
@@ -394,7 +398,6 @@
           signatories,
           currentFont,
         ));
-
       }
       e.target.value = "";
     } else {
@@ -539,6 +542,7 @@
       >
         Download
       </button>
+      <ZoomControls {zoom} onZoomChange={setZoom} />
       {#if hasSignatory && !signRequested && signatureProviders.length > 0}
         <button
           on:click={sendForSignature}
@@ -591,6 +595,7 @@
                 class:shadow-outline={pIndex === selectedPageIndex}
               >
                 <PDFPage
+                  scale={pagesScale[pIndex]}
                   on:measure={(e) => onMeasure(e.detail.scale, pIndex)}
                   {page}
                 />

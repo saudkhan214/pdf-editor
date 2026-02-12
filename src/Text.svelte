@@ -49,7 +49,6 @@
     dx = 0;
     dy = 0;
     operation = "";
-
   }
   function handlePanStart(event) {
     startX = event.detail.x;
@@ -90,7 +89,7 @@
       if (focusNode === editable) {
         editable.insertBefore(
           document.createElement("br"),
-          childNodes[focusOffset]
+          childNodes[focusOffset],
         );
       } else if (focusNode instanceof HTMLBRElement) {
         editable.insertBefore(document.createElement("br"), focusNode);
@@ -129,7 +128,7 @@
     let weirdNode;
     while (
       (weirdNode = Array.from(editable.childNodes).find(
-        (node) => !["#text", "BR"].includes(node.nodeName)
+        (node) => !["#text", "BR"].includes(node.nodeName),
       ))
     ) {
       editable.removeChild(weirdNode);
@@ -146,7 +145,8 @@
     });
   }
   function render() {
-    editable.innerHTML = text;
+    console.log("render text", text);
+    editable.innerHTML = text ? text : "Text Box";
     // editable.focus();
   }
   function extractLines() {

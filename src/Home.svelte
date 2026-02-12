@@ -55,7 +55,7 @@
       let signatory = signatories[i];
       if (!signatory.email || !signatory.name) {
         alert(
-          `Please fill out both the email and name for signatory #${i + 1}`
+          `Please fill out both the email and name for signatory #${i + 1}`,
         );
         return; // Stop function if validation fails
       }
@@ -98,7 +98,7 @@
           allObjects,
           pdfName,
           pdfFile,
-          pagesScale
+          pagesScale,
         ));
 
         selectedPageIndex = 0;
@@ -129,7 +129,7 @@
           e.target,
           pages,
           selectedPageIndex,
-          allObjects
+          allObjects,
         ));
       } else {
         ({ pages, allObjects } = await addTextField(
@@ -138,9 +138,8 @@
           selectedPageIndex,
           allObjects,
           signatories,
-          currentFont
+          currentFont,
         ));
-
       }
       e.target.value = "";
     } else {
@@ -171,17 +170,16 @@
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.map((object) =>
-            object.id === objectId ? { ...object, ...payload } : object
+            object.id === objectId ? { ...object, ...payload } : object,
           )
-        : objects
+        : objects,
     );
-
   }
   function deleteObject(objectId) {
     allObjects = allObjects.map((objects, pIndex) =>
       pIndex == selectedPageIndex
         ? objects.filter((object) => object.id !== objectId)
-        : objects
+        : objects,
     );
   }
 
@@ -195,7 +193,7 @@
                   ? object.signatory.stamps
                   : []
               ).map((stamp, index) =>
-                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp
+                index === stampIndex ? { ...stamp, ...updatedStamp } : stamp,
               );
 
               return {
@@ -208,7 +206,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
 
@@ -220,7 +218,7 @@
               const stamps =
                 object.signatory && Array.isArray(object.signatory.stamps)
                   ? object.signatory.stamps.filter(
-                      (_, index) => index !== stampIndex
+                      (_, index) => index !== stampIndex,
                     )
                   : [];
 
@@ -234,7 +232,7 @@
             }
             return object;
           })
-        : objects
+        : objects,
     );
   }
 
@@ -268,7 +266,7 @@
       object,
       pages,
       selectedPageIndex,
-      allObjects
+      allObjects,
     ));
   }
 </script>
@@ -396,7 +394,7 @@
             originWidth,
             originHeight,
             path,
-            scale
+            scale,
           );
           addingDrawing = false;
         }}
@@ -436,6 +434,7 @@
               class:shadow-outline={pIndex === selectedPageIndex}
             >
               <PDFPage
+                scale={pagesScale[pIndex]}
                 on:measure={(e) => onMeasure(e.detail.scale, pIndex)}
                 {page}
               />
