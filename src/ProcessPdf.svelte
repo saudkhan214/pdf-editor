@@ -29,7 +29,6 @@
   let signedPdfUrl = "";
   let currentFont = "Times-Roman";
   let signatureProviders = [];
-  let docSignWindow;
   let selectedSignatureProvider;
   let recipientSigningStatus;
   let contract;
@@ -164,13 +163,13 @@
       var data = await res.json();
       if (data.status == true) {
         if (data.redirect) {
-          docSignWindow = window.open(
+          window.docSignWindow = window.open(
             data.redirect,
             "PDF Signature",
             "width=400,height=600",
           );
-          if (docSignWindow) {
-            docSignWindow.focus();
+          if (window.docSignWindow) {
+            window.docSignWindow.focus();
           } else {
             alert("Please allow popups for this website.");
           }
@@ -195,18 +194,24 @@
 
   function handleMessage(event) {
     // Optional: add origin check for security
-    if (event.origin !== config.API_HOST.replace("/api", "")) {
+    const allowedOrigin = new URL(config.API_HOST).origin.trim();
+    const eventOrigin = event.origin.trim();
+    if (eventOrigin.localeCompare(allowedOrigin) !== 0) {
       console.warn("Received message from unauthorized origin:", event.origin);
       return;
     }
 
-    if (docSignWindow) {
-      docSignWindow.close();
-      docSignWindow = null;
+    if (window.docSignWindow) {
+      window.docSignWindow.close();
+      window.docSignWindow = null;
     }
 
     console.log("Received postMessage:", event.data);
-    alert(event.data.message);
+    alert(
+      event.data.message
+        ? event.data.message
+        : "Some thing went wrong during signing process.",
+    );
     setTimeout(() => {
       window.location.reload();
     }, 2000);
@@ -446,9 +451,7 @@
                 />
                 <div
                   class="absolute top-0 left-0 transform origin-top-left"
-                  style="transform: scale({pagesScale[
-                    pIndex
-                  ]}); touch-action: none;"
+                  style="transform: scale({zoom}); touch-action: none;"
                 >
                   {#each allObjects[pIndex] as object (object.id)}
                     {#if object.type === "image"}

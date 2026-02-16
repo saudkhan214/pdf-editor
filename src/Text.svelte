@@ -146,7 +146,7 @@
   }
   function render() {
     console.log("render text", text);
-    editable.innerHTML = text ? text : "Text Box";
+    editable.innerHTML = text && text.trim() ? text : "Text Box";
     // editable.focus();
   }
   function extractLines() {
