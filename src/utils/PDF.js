@@ -2,6 +2,7 @@ import { readAsArrayBuffer } from "./asyncReader.js";
 import { fetchFont, getAsset } from "./prepareAssets";
 import { noop } from "./helper.js";
 import { config } from "./config.js";
+import fontkit from '@pdf-lib/fontkit';
 const basePath = process.env.BASE_PATH;
 
 export async function save(pdfFile, objects, tags, entityName) {
@@ -72,15 +73,17 @@ export async function copy(contract) {
   }
 }
 export function downloadPdf(pdfBytes, name) {
-  download(pdfBytes, name, "application/pdf");
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  download(blob, name, "application/pdf");
 }
 export async function processPdf(
   pdfFile,
   objects
 ) {
   const PDFLib = await getAsset("PDFLib");
-  const download = await getAsset("download");
-  const makeTextPDF = await getAsset("makeTextPDF");
+  // const download = await getAsset("download");
+  // const makeTextPDF = await getAsset("makeTextPDF");
+
   let pdfDoc;
   try {
     pdfDoc = await PDFLib.PDFDocument.load(await readAsArrayBuffer(pdfFile));
@@ -88,6 +91,8 @@ export async function processPdf(
     console.log("Failed to load PDF.");
     throw e;
   }
+
+  pdfDoc.registerFontkit(fontkit);
   const pagesProcesses = pdfDoc.getPages().map(async (page, pageIndex) => {
     const pageObjects = objects[pageIndex];
     // 'y' starts from bottom in PDFLib, use this to calculate y
@@ -130,50 +135,66 @@ export async function processPdf(
             width: width,
             height: height,
           });
-          // const svgPath = checked
-          //   ? "M4,4 H20 V20 H4 Z M6,12 L10,16 L18,8"
-          //   : "M4,4 H20 V20 H4 Z";
-
-          // page.drawSvgPath(svgPath, {
-          //   x,
-          //   y: pageHeight - y - height,
-          //   borderColor: PDFLib.rgb(0, 0, 0),
-          //   borderWidth: 2,
-          // });
-
-          // page.drawRectangle({
-          //   x,
-          //   y: pageHeight - y - height,
-          //   width,
-          //   height,
-          //   color: checked ? PDFLib.rgb(0, 0, 0) : PDFLib.rgb(1, 1, 1),
-          // });
         };
       } else if (object.type === "text") {
-        let { x, y, lines, lineHeight, size, fontFamily, width, fontColor } =
+        let { x, y, lines, lineHeight, size, fontFamily, width, fontColor= '#000000' } =
           object;
-        const height = size * lineHeight * (lines ? lines.length : 1);
+
+        // Ensure font is ArrayBuffer or Uint8Array
         const font = await fetchFont(fontFamily);
-        width = getTextWidth(lines, width) + 5;
-        const [textPage] = await pdfDoc.embedPdf(
-          await makeTextPDF({
-            lines,
-            fontSize: size,
-            lineHeight,
-            width,
-            height,
-            font: font.buffer || fontFamily, // built-in font family
-            dy: font.correction(size, lineHeight),
-            fontColor,
-          })
+        const customFont = await pdfDoc.embedFont(font.buffer || fontFamily);
+
+        const colorRgb = PDFLib.rgb(
+          parseInt(fontColor.slice(1, 3), 16) / 255,
+          parseInt(fontColor.slice(3, 5), 16) / 255,
+          parseInt(fontColor.slice(5, 7), 16) / 255
         );
-        return () =>
-          page.drawPage(textPage, {
-            width,
-            height,
-            x,
-            y: pageHeight - y - height,
+
+        return () => {
+          lines.forEach((line, index) => {
+            // const text = prepareArabic(line);
+            const text = line;
+            const textWidth = customFont.widthOfTextAtSize(text, size);
+            // Right-to-left alignment: shift x if needed
+            const xPos = x; // Adjust here for page-aligned RTL
+            const yPos = pageHeight - y - size * lineHeight * (index + 1);
+            page.drawText(text, {
+              x: xPos,
+              y: yPos,
+              size,
+              font: customFont,
+              color: colorRgb,
+            });
           });
+        };
+        // const height = size * lineHeight * (lines ? lines.length : 1);
+        // const font = await fetchFont(fontFamily);
+
+        // const processedLines = lines.map(processLine);
+        // const maxWidth = processedLines.reduce((max, { text }) => {
+        //   return Math.max(max, getTextWidth([text], 0));
+        // }, 0);
+
+        // width = Math.max(maxWidth + 5, width || 0);
+        // const [textPage] = await pdfDoc.embedPdf(
+        //   await makeTextPDF({
+        //     lines: processedLines.map(l => l.text),
+        //     fontSize: size,
+        //     lineHeight,
+        //     width,
+        //     height,
+        //     font: font.buffer || fontFamily, // built-in font family
+        //     dy: font.correction(size, lineHeight),
+        //     fontColor,
+        //   })
+        // );
+        // return () =>
+        //   page.drawPage(textPage, {
+        //     width,
+        //     height,
+        //     x,
+        //     y: pageHeight - y - height,
+        //   });
       } else if (object.type === "drawing") {
         let { x, y, path, scale } = object;
         const {
@@ -209,23 +230,6 @@ export async function processPdf(
   await Promise.all(pagesProcesses);
   try {
     return await pdfDoc.save();
-    // Convert Uint8Array to Blob
-    //const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
-    // if (is_signing) {
-    //   var data = new FormData();
-    //   data.append("pdf", pdfBlob, name);
-    //   data.append("is_processed_pdf", true);
-    //   data.append("entityName", entityName);
-    //   data.append("entityId", entityId);
-    //   data.append("contractId", contractId);
-    //   await fetch(`${config.API_HOST}/contract/save-pdf`, {
-    //     method: "POST",
-    //     body: data,
-    //   });
-    // } else {
-    //   download(pdfBytes, name, "application/pdf");
-    //   // window.close()
-    // }
   } catch (e) {
     console.log("Failed to process PDF.");
     throw e;

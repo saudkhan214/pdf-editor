@@ -45,7 +45,12 @@ export async function addTextField(
     var signatory = signatories.find((a) => a.email == dataObj._datafield);
     if (signatory) {
       object.type = "signatory";
-      object.signatory = signatory;
+      object.signatory = {
+        ...signatory,
+        email: validateEmail(signatory.email)
+          ? signatory.email
+          : `[${signatory.email}]`,
+      };
     }
   }
   allObjects = allObjects.map((objects, pIndex) =>

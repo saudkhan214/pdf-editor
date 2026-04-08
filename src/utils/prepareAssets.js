@@ -58,15 +58,27 @@ const fonts = {
       return (size * lineHeight - size) / 2 + size / 10;
     },
   },
-  "Times-Roman": {
-    correction(size, lineHeight) {
-      return (size * lineHeight - size) / 2 + size / 7;
-    },
-  },
+  // "Times-Roman": {
+  //   correction(size, lineHeight) {
+  //     return (size * lineHeight - size) / 2 + size / 7;
+  //   },
+  // },
 };
 // Available fonts
 export const Fonts = {
   ...fonts,
+  Calibri: {
+    src: "./calibril.ttf",
+    correction(size, lineHeight) {
+      return (size * lineHeight - size) / 2 + size / 9;
+    },
+  },
+  'Times-Roman': {
+    src: "./times.ttf",
+    correction(size, lineHeight) {
+      return (size * lineHeight - size) / 2 + size / 7;
+    },
+  },
   // Arial: {
   //   src: "./arial.ttf",
   //   correction(size, lineHeight) {

@@ -36,10 +36,12 @@ window.makeTextPDF = async function makeTextPDF({
   });
   doc.end();
   return new Promise((res) => {
-    stream.on('finish', function () {
+    stream.on('finish',async function () {
       const blob = stream.toBlob('application/pdf');
-      const response = new Response(blob);
-      res(response.arrayBuffer());
+      const buffer = await blob.arrayBuffer();
+      res(buffer);
+      // const response = new Response(blob);
+      // res(response.arrayBuffer());
     });
   });
 };
