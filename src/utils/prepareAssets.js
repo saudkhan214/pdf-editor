@@ -68,13 +68,13 @@ const fonts = {
 export const Fonts = {
   ...fonts,
   Calibri: {
-    src: "./calibril.ttf",
+    src: "/calibril.ttf",
     correction(size, lineHeight) {
       return (size * lineHeight - size) / 2 + size / 9;
     },
   },
   'Times-Roman': {
-    src: "./times.ttf",
+    src: "/times.ttf",
     correction(size, lineHeight) {
       return (size * lineHeight - size) / 2 + size / 7;
     },

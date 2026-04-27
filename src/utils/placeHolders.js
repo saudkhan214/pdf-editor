@@ -1611,6 +1611,16 @@ export let placeHolders = {
           _datafield: "TransactionAgentSignature",
           _case: "Contract",
         },
+        {
+          _name: "Security Deposit without AED",
+          _datafield: "SecurityDepositWOCurrnecy",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Security Deposit without AED",
+          _datafield: "SecurityDepositWOCurrnecy",
+          _case: "Contract",
+        },
       ],
       _name: "Transaction",
       _case: "all",
@@ -11604,6 +11614,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "1st Berth Parking Type",
+          _datafield: "1stBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "1st Berth Parking Type",
+          _datafield: "1stBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "1st Berth Parking Type",
+          _datafield: "1stBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "1st Berth Parking Type",
+          _datafield: "1stBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "2nd Berth Parking Name",
           _datafield: "2ndBerthParkingName",
           _case: "Reservationform"
@@ -11801,6 +11831,26 @@ export let placeHolders = {
         {
           _name: "2nd Berth Parking Others",
           _datafield: "2ndBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "2nd Berth Parking Type",
+          _datafield: "2ndBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "2nd Berth Parking Type",
+          _datafield: "2ndBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "2nd Berth Parking Type",
+          _datafield: "2ndBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "2nd Berth Parking Type",
+          _datafield: "2ndBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -12004,6 +12054,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "3rd Berth Parking Type",
+          _datafield: "3rdBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "3rd Berth Parking Type",
+          _datafield: "3rdBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "3rd Berth Parking Type",
+          _datafield: "3rdBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "3rd Berth Parking Type",
+          _datafield: "3rdBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "4th Berth Parking Name",
           _datafield: "4thBerthParkingName",
           _case: "Reservationform"
@@ -12201,6 +12271,26 @@ export let placeHolders = {
         {
           _name: "4th Berth Parking Others",
           _datafield: "4thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "4th Berth Parking Type",
+          _datafield: "4thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "4th Berth Parking Type",
+          _datafield: "4thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "4th Berth Parking Type",
+          _datafield: "4thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "4th Berth Parking Type",
+          _datafield: "4thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -12404,6 +12494,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "5th Berth Parking Type",
+          _datafield: "5thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "5th Berth Parking Type",
+          _datafield: "5thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "5th Berth Parking Type",
+          _datafield: "5thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "5th Berth Parking Type",
+          _datafield: "5thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "6th Berth Parking Name",
           _datafield: "6thBerthParkingName",
           _case: "Reservationform"
@@ -12601,6 +12711,26 @@ export let placeHolders = {
         {
           _name: "6th Berth Parking Others",
           _datafield: "6thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "6th Berth Parking Type",
+          _datafield: "6thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "6th Berth Parking Type",
+          _datafield: "6thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "6th Berth Parking Type",
+          _datafield: "6thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "6th Berth Parking Type",
+          _datafield: "6thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -12804,6 +12934,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "7th Berth Parking Type",
+          _datafield: "7thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "7th Berth Parking Type",
+          _datafield: "7thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "7th Berth Parking Type",
+          _datafield: "7thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "7th Berth Parking Type",
+          _datafield: "7thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "8th Berth Parking Name",
           _datafield: "8thBerthParkingName",
           _case: "Reservationform"
@@ -13001,6 +13151,26 @@ export let placeHolders = {
         {
           _name: "8th Berth Parking Others",
           _datafield: "8thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "8th Berth Parking Type",
+          _datafield: "8thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "8th Berth Parking Type",
+          _datafield: "8thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "8th Berth Parking Type",
+          _datafield: "8thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "8th Berth Parking Type",
+          _datafield: "8thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -13204,6 +13374,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "9th Berth Parking Type",
+          _datafield: "9thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "9th Berth Parking Type",
+          _datafield: "9thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "9th Berth Parking Type",
+          _datafield: "9thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "9th Berth Parking Type",
+          _datafield: "9thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "10th Berth Parking Name",
           _datafield: "10thBerthParkingName",
           _case: "Reservationform"
@@ -13401,6 +13591,26 @@ export let placeHolders = {
         {
           _name: "10th Berth Parking Others",
           _datafield: "10thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "10th Berth Parking Type",
+          _datafield: "10thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "10th Berth Parking Type",
+          _datafield: "10thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "10th Berth Parking Type",
+          _datafield: "10thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "10th Berth Parking Type",
+          _datafield: "10thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -13604,6 +13814,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "11th Berth Parking Type",
+          _datafield: "11thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "11th Berth Parking Type",
+          _datafield: "11thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "11th Berth Parking Type",
+          _datafield: "11thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "11th Berth Parking Type",
+          _datafield: "11thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "12th Berth Parking Name",
           _datafield: "12thBerthParkingName",
           _case: "Reservationform"
@@ -13801,6 +14031,26 @@ export let placeHolders = {
         {
           _name: "12th Berth Parking Others",
           _datafield: "12thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "12th Berth Parking Type",
+          _datafield: "12thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "12th Berth Parking Type",
+          _datafield: "12thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "12th Berth Parking Type",
+          _datafield: "12thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "12th Berth Parking Type",
+          _datafield: "12thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -14004,6 +14254,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "13th Berth Parking Type",
+          _datafield: "13thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "13th Berth Parking Type",
+          _datafield: "13thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "13th Berth Parking Type",
+          _datafield: "13thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "13th Berth Parking Type",
+          _datafield: "13thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "14th Berth Parking Name",
           _datafield: "14thBerthParkingName",
           _case: "Reservationform"
@@ -14201,6 +14471,26 @@ export let placeHolders = {
         {
           _name: "14th Berth Parking Others",
           _datafield: "14thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "14th Berth Parking Type",
+          _datafield: "14thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "14th Berth Parking Type",
+          _datafield: "14thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "14th Berth Parking Type",
+          _datafield: "14thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "14th Berth Parking Type",
+          _datafield: "14thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -14404,6 +14694,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "15th Berth Parking Type",
+          _datafield: "15thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "15th Berth Parking Type",
+          _datafield: "15thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "15th Berth Parking Type",
+          _datafield: "15thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "15th Berth Parking Type",
+          _datafield: "15thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "16th Berth Parking Name",
           _datafield: "16thBerthParkingName",
           _case: "Reservationform"
@@ -14601,6 +14911,26 @@ export let placeHolders = {
         {
           _name: "16th Berth Parking Others",
           _datafield: "16thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "16th Berth Parking Type",
+          _datafield: "16thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "16th Berth Parking Type",
+          _datafield: "16thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "16th Berth Parking Type",
+          _datafield: "16thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "16th Berth Parking Type",
+          _datafield: "16thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -14804,6 +15134,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "17th Berth Parking Type",
+          _datafield: "17thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "17th Berth Parking Type",
+          _datafield: "17thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "17th Berth Parking Type",
+          _datafield: "17thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "17th Berth Parking Type",
+          _datafield: "17thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "18th Berth Parking Name",
           _datafield: "18thBerthParkingName",
           _case: "Reservationform"
@@ -15001,6 +15351,26 @@ export let placeHolders = {
         {
           _name: "18th Berth Parking Others",
           _datafield: "18thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "18th Berth Parking Type",
+          _datafield: "18thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "18th Berth Parking Type",
+          _datafield: "18thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "18th Berth Parking Type",
+          _datafield: "18thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "18th Berth Parking Type",
+          _datafield: "18thBerthParkingType",
           _case: "TermsAndCondition"
         },
         {
@@ -15204,6 +15574,26 @@ export let placeHolders = {
           _case: "TermsAndCondition"
         },
         {
+          _name: "19th Berth Parking Type",
+          _datafield: "19thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "19th Berth Parking Type",
+          _datafield: "19thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "19th Berth Parking Type",
+          _datafield: "19thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "19th Berth Parking Type",
+          _datafield: "19thBerthParkingType",
+          _case: "TermsAndCondition"
+        },
+        {
           _name: "20th Berth Parking Name",
           _datafield: "20thBerthParkingName",
           _case: "Reservationform"
@@ -15401,6 +15791,26 @@ export let placeHolders = {
         {
           _name: "20th Berth Parking Others",
           _datafield: "20thBerthParkingOthers",
+          _case: "TermsAndCondition"
+        },
+        {
+          _name: "20th Berth Parking Type",
+          _datafield: "20thBerthParkingType",
+          _case: "Reservationform"
+        },
+        {
+          _name: "20th Berth Parking Type",
+          _datafield: "20thBerthParkingType",
+          _case: "Contract"
+        },
+        {
+          _name: "20th Berth Parking Type",
+          _datafield: "20thBerthParkingType",
+          _case: "LeaseRenewalLetter"
+        },
+        {
+          _name: "20th Berth Parking Type",
+          _datafield: "20thBerthParkingType",
           _case: "TermsAndCondition"
         }
       ],
