@@ -16,6 +16,8 @@
   export let fontFamily;
   export let fontColor;
   export let pageScale = 1;
+  export let charLimit = 80;
+  export let dir = "ltr";
   const Families = Object.keys(Fonts);
   const dispatch = createEventDispatcher();
   let startX;
@@ -29,21 +31,31 @@
   let dx = 0;
   let dy = 0;
   let operation = "";
+  let _charLimit = charLimit;
+  let _dir = dir;
   const basePath = process.env.BASE_PATH;
   function handlePanMove(event) {
     dx = (event.detail.x - startX) / pageScale;
     dy = (event.detail.y - startY) / pageScale;
   }
 
+  $: if (charLimit) {
+    _charLimit = charLimit;
+  }
+  $: if (dir) {
+    _dir = dir;
+  }
   function handlePanEnd(event) {
     if (dx === 0 && dy === 0) {
       return editable.focus();
     }
+    const currentLimit = parseInt(_charLimit) || 100;
     dispatch("update", {
       x: x + dx,
       y: y + dy,
       lines: extractLines(),
-      width: editable.clientWidth,
+      charLimit: currentLimit,
+      dir: _dir,
       text: editable.textContent,
     });
     dx = 0;
@@ -62,9 +74,12 @@
     if (operation !== "edit" || operation === "tool") return;
     editable.blur();
     sanitize();
+    const currentLimit = parseInt(_charLimit) || 100;
+    const newLines = extractLines();
     dispatch("update", {
-      lines: extractLines(),
-      width: editable.clientWidth,
+      lines: newLines,
+      charLimit: currentLimit,
+      dir: _dir,
       text: editable.textContent,
     });
     operation = "";
@@ -116,11 +131,16 @@
   }
   async function onBlurTool() {
     if (operation !== "tool" || operation === "edit") return;
+    const currentLimit = parseInt(_charLimit) || 80;
     dispatch("update", {
       lines: extractLines(),
       lineHeight: _lineHeight,
       size: _size,
       fontFamily: _fontFamily,
+      charLimit: currentLimit,
+      dir: _dir,
+      fontColor: _fontColor,
+      fontWeight: _fontWeight,
     });
     operation = "";
   }
@@ -145,25 +165,55 @@
     });
   }
   function render() {
-    console.log("render text", text);
-    editable.innerHTML = text && text.trim() ? text : "Text Box";
-    // editable.focus();
+    const limit = parseInt(_charLimit) || 80;
+    const displayText = text && text.trim() ? text : "Text Box";
+    const formatted = formatTextForDisplay(displayText, limit);
+    editable.innerHTML = formatted;
   }
   function extractLines() {
-    const nodes = editable.childNodes;
+    const textContent = editable.textContent || "";
+    const cleanText = textContent.replace(/\s+/g, " ");
     const lines = [];
-    let lineText = "";
-    for (let index = 0; index < nodes.length; index++) {
-      const node = nodes[index];
-      if (node.nodeName === "BR") {
-        lines.push(lineText);
-        lineText = "";
-      } else {
-        lineText += node.textContent;
-      }
+    const limit = parseInt(_charLimit) || 80;
+    for (let i = 0; i < cleanText.length; i += limit) {
+      const chunk = cleanText.substring(i, i + limit);
+      lines.push(chunk);
     }
-    lines.push(lineText);
-    return lines;
+    return {
+      lines: lines.length > 0 ? lines : [""],
+      dir: _dir,
+    };
+  }
+
+  function formatTextForDisplay(rawText, limit) {
+    if (!rawText || !rawText.trim()) return "Text Box";
+    const cleanText = rawText.replace(/\s+/g, " ").trim();
+    const words = cleanText.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    words.forEach((word) => {
+      if (word.length >= limit) {
+        if (currentLine !== "") {
+          lines.push(currentLine);
+          currentLine = "";
+        }
+        lines.push(word);
+        return;
+      }
+
+      const testLine = currentLine === "" ? word : currentLine + " " + word;
+
+      if (testLine.length <= limit) {
+        currentLine = testLine;
+      } else {
+        if (currentLine !== "") lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+
+    if (currentLine !== "") lines.push(currentLine);
+    return lines.length > 0 ? lines.join("<br>") : "Text Box";
   }
   function onDelete() {
     dispatch("delete");
@@ -181,6 +231,18 @@
       class="h-full flex justify-center items-center bg-gray-300 border-b
       border-gray-400"
     >
+      <div class="mr-2 flex items-center">
+        <span class="text-xs mr-1">Limit:</span>
+        <input
+          type="number"
+          min="1"
+          max="500"
+          class="h-6 w-12 text-center rounded-sm"
+          bind:value={_charLimit}
+          on:change={() =>
+            dispatch("update", { charLimit: parseInt(_charLimit) })}
+        />
+      </div>
       <div class="mr-2 flex items-center">
         <img
           src={`${basePath}line_height.svg`}
@@ -256,6 +318,32 @@
       <div class="mr-2 flex items-center">
         <input type="color" bind:value={_fontColor} on:input={onChangeColor} />
       </div>
+      <div class="mr-2 flex items-center border-l border-gray-400 pl-2">
+        <button
+          type="button"
+          class="px-2 py-1 text-xs border rounded-l {_dir === 'ltr'
+            ? 'bg-blue-500 text-white'
+            : 'bg-white'}"
+          on:click={() => {
+            _dir = "ltr";
+            console.log("Direction changed to LTR");
+          }}
+        >
+          LTR
+        </button>
+        <button
+          type="button"
+          class="px-2 py-1 text-xs border rounded-r {_dir === 'rtl'
+            ? 'bg-blue-500 text-white'
+            : 'bg-white'}"
+          on:click={() => {
+            _dir = "rtl";
+            console.log("Direction changed to RTL");
+          }}
+        >
+          RTL
+        </button>
+      </div>
       <div
         on:click={onDelete}
         class="w-5 h-5 rounded-full bg-white cursor-pointer"
@@ -281,7 +369,7 @@
     on:panmove={handlePanMove}
     on:panend={handlePanEnd}
     class="absolute w-full h-full cursor-grab border border-dotted
-    border-gray-500"
+     border-gray-500"
     class:cursor-grab={!operation}
     class:cursor-grabbing={operation === "move"}
     class:editing={["edit", "tool"].includes(operation)}
@@ -293,9 +381,22 @@
     on:paste|preventDefault={onPaste}
     contenteditable="true"
     spellcheck="false"
-    class="outline-none whitespace-no-wrap"
-    style="font-size: {_size}px; font-family: '{_fontFamily}', serif;
-    line-height: {_lineHeight};color:{_fontColor}; -webkit-user-select: text;font-weight:{_fontWeight}"
+    class="outline-none"
+    style="
+    font-size: {_size}px; 
+    font-family: '{_fontFamily}', serif;
+    line-height: {_lineHeight}; 
+    color: {_fontColor}; 
+    font-weight: {_fontWeight};
+    -webkit-user-select: text;
+    width: {_charLimit * (_size * 0.6)}px; 
+    min-width: 100px;
+    word-break: break-all;      
+    overflow-wrap: break-word; 
+    white-space: pre-wrap;     
+    text-align: {_dir === 'rtl' ? 'right' : 'left'};
+    display: block;
+  "
   />
 </div>
 

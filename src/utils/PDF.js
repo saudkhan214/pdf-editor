@@ -136,38 +136,65 @@ export async function processPdf(
             height: height,
           });
         };
-      } else if (object.type === "text") {
-        let { x, y, lines, lineHeight, size, fontFamily, width, fontColor= '#000000' } =
-          object;
+      }else if (object.type === "text") {
+  let { x, y, text, lines, lineHeight, size, fontFamily, charLimit, fontColor = '#000000', dir = 'ltr' } = object;
+  let limit = parseInt(charLimit) || 80;
+  const fontData = await fetchFont(fontFamily);
+  const customFont = await pdfDoc.embedFont(fontData.buffer, { subset: false });
+  const colorRgb = PDFLib.rgb(
+    parseInt(fontColor.slice(1, 3), 16) / 255,
+    parseInt(fontColor.slice(3, 5), 16) / 255,
+    parseInt(fontColor.slice(5, 7), 16) / 255
+  );
+ 
+  let finalLines = [];
+  let contentValue = text || (Array.isArray(lines) ? lines.join(" ") : (lines || ""));
+  let content = (typeof contentValue === 'object' && contentValue !== null) ? "" : String(contentValue || "");
+  content = content.replace(/\s+/g, ' ').trim();
+if (dir === 'rtl') {
+    const fkFont = fontkit.create(fontData.buffer);
+    const layout = fkFont.layout(content);
+    let shaped = layout.glyphs.map(g => String.fromCodePoint(...g.codePoints)).join('');
+    let fullReverse = shaped.split('').reverse().join('');
+    content = fullReverse.replace(/[0-9a-zA-Z%$./:-@_-]+([\s,]+[0-9a-zA-Z%$./:-@_-]+)*/g, (m) => {
+      return m.split('').reverse().join('');
+    });
+  }
 
-        // Ensure font is ArrayBuffer or Uint8Array
-        const font = await fetchFont(fontFamily);
-        const customFont = await pdfDoc.embedFont(font.buffer || fontFamily);
+  const words = content.split(' ');
+  let currentLine = "";
+  words.forEach(word => {
+    const testLine = currentLine === "" ? word : currentLine + " " + word;
+    if (testLine.length <= limit) {
+      currentLine = testLine;
+    } else {
+      if (currentLine !== "") finalLines.push(currentLine);
+      currentLine = word;
+    }
+  });
+  if (currentLine !== "") finalLines.push(currentLine);
+ 
+  return () => {
+    finalLines.forEach((line, index) => {
+      const textWidth = customFont.widthOfTextAtSize(line, size);
+      const yPos = pageHeight - y - (size * 0.9) - (size * index * lineHeight);
+      
+      let drawX = x;
+      if (dir === 'rtl') {
+        const boxWidth = limit * (size * 0.6); 
+        drawX = x + boxWidth - textWidth;
+      }
 
-        const colorRgb = PDFLib.rgb(
-          parseInt(fontColor.slice(1, 3), 16) / 255,
-          parseInt(fontColor.slice(3, 5), 16) / 255,
-          parseInt(fontColor.slice(5, 7), 16) / 255
-        );
-
-        return () => {
-          lines.forEach((line, index) => {
-            // const text = prepareArabic(line);
-            const text = line;
-            const textWidth = customFont.widthOfTextAtSize(text, size);
-            // Right-to-left alignment: shift x if needed
-            const xPos = x; // Adjust here for page-aligned RTL
-            const yPos = pageHeight - y - size * lineHeight * (index + 1);
-            page.drawText(text, {
-              x: xPos,
-              y: yPos,
-              size,
-              font: customFont,
-              color: colorRgb,
-            });
-          });
-        };
-        // const height = size * lineHeight * (lines ? lines.length : 1);
+      page.drawText(line, {
+        x: drawX,
+        y: yPos, 
+        size: size,
+        font: customFont,
+        color: colorRgb,
+      });
+    });
+  };
+  // const height = size * lineHeight * (lines ? lines.length : 1);
         // const font = await fetchFont(fontFamily);
 
         // const processedLines = lines.map(processLine);
@@ -195,7 +222,7 @@ export async function processPdf(
         //     x,
         //     y: pageHeight - y - height,
         //   });
-      } else if (object.type === "drawing") {
+} else if (object.type === "drawing") {
         let { x, y, path, scale } = object;
         const {
           pushGraphicsState,

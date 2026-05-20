@@ -294,7 +294,7 @@ export let placeHolders = {
           _datafield: "PricePerSquareFoot",
         },
         {
-          _name: "DEWA No.",
+          _name: "Consumer Number",
           _datafield: "ConsumerNumber",
         },
         {
@@ -1611,10 +1611,20 @@ export let placeHolders = {
           _datafield: "TransactionAgentSignature",
           _case: "Contract",
         },
+        {
+          _name: "Renewal Fee",
+          _datafield: "RenewalFee",
+          _case: "Reservationform",
+        },
+        {
+          _name: "Renewal Fee",
+          _datafield: "RenewalFee",
+          _case: "Contract",
+        },
       ],
       _name: "Transaction",
       _case: "all",
-    },
+     },
     {
       PlaceHolder: [
         {

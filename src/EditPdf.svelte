@@ -54,6 +54,19 @@
         //   (a) => a.filter((x) => x.type != "signatory") //ignore the signatory fields to be process
         // );
         allObjects = JSON.parse(pdfJsonData.jsonMetadata);
+        const rawObjects = JSON.parse(pdfJsonData.jsonMetadata);
+        allObjects = rawObjects.map((pageObjects) =>
+          pageObjects.map((obj) => {
+            if (obj.type === "text" || obj.type === "signatory") {
+              return {
+                ...obj,
+                charLimit: obj.charLimit || 80,
+                dir: obj.dir || "ltr",
+              };
+            }
+            return obj;
+          }),
+        );
         const base64Pdf = pdfJsonData.pdf;
         const byteCharacters = atob(base64Pdf);
         const byteNumbers = new Array(byteCharacters.length)
@@ -661,6 +674,8 @@
                       fontColor={object.fontColor}
                       fontFamily={object.fontFamily}
                       fontWeight={object.fontWeight}
+                      charLimit={object.charLimit || 80}
+                      dir={object.dir}
                       pageScale={pagesScale[pIndex]}
                     />
                   {:else if object.type === "signatory"}

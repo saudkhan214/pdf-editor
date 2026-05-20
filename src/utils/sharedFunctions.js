@@ -28,19 +28,20 @@ export async function addTextField(
     window.devicePixelRatio;
   // var yAxis = window.scrollY - pageHeight * selectedPageIndex + 45;
   const position = calculateObjectPosition(objs, yAxis, viewport.width, text);
-  const object = {
-    id,
-    text,
-    type: "text",
-    lines: [text],
-    size: 12,
-    width: 0, // recalculate after editing
-    lineHeight: 1.4,
-    fontWeight: 100,
-    fontFamily: currentFont,
-    x: position.x,
-    y: position.y,
-  };
+const object = {
+  id,
+  text,
+  type: "text",
+  lines: [text],
+  size: 12,
+  width: 0, // recalculate after editing
+  lineHeight: 1.4,
+  charLimit: 80, 
+  fontWeight: 100,
+  fontFamily: currentFont,
+  x: position.x,
+  y: position.y,
+};
   if (dataObj._case == "Signatory") {
     var signatory = signatories.find((a) => a.email == dataObj._datafield);
     if (signatory) {

@@ -18,13 +18,11 @@
   const production = config.ENV === "prod";
   console.log(production);
 
-  const routes = {
-    process: production ? "/pdf-contracts/processpdf" : "processpdf",
-    process_ext: production ? "/pdf-contracts/processxpdf" : "processxpdf",
-    edit: production
-      ? "/pdf-contracts/editpdf/:resource_id"
-      : "editpdf/:resource_id",
-  };
+const routes = {
+  process: "/pdf-contracts/processpdf",
+  process_ext: "/pdf-contracts/processxpdf",
+  edit: "/pdf-contracts/editpdf/:resource_id",
+};
 </script>
 
 <style>

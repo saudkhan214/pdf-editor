@@ -61,19 +61,21 @@
           signRequested = false; //reinitiate the signing flow
         }
         contract = pdfJsonData.contract;
-        const metaData = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
-          // Check if any item in the array has type === "signatory"
+        allObjects = JSON.parse(pdfJsonData.jsonMetadata).map((a) => {
           if (
             a.some((x) => x.type === "signatory") &&
             signatureProviders.length > 0
           ) {
             hasSignatory = true;
           }
-
           // Return the array without signatory items
-          return a; //.filter((x) => x.type !== "signatory");
+          return a.map((obj) => {
+            if (obj.type === "text" || obj.type === "signatory") {
+              return { ...obj, charLimit: obj.charLimit || 80, dir: obj.dir };
+            }
+            return obj;
+          });
         });
-        allObjects = metaData;
         const base64Pdf = pdfJsonData.pdf;
         const byteCharacters = atob(base64Pdf);
         const byteNumbers = new Array(byteCharacters.length)
@@ -469,6 +471,8 @@
                         fontColor={object.fontColor}
                         fontFamily={object.fontFamily}
                         fontWeight={object.fontWeight}
+                        charLimit={object.charLimit || 80}
+                        dir={object.dir}
                         pageScale={zoom}
                       />
                     {:else if object.type === "checkbox"}
