@@ -26,6 +26,11 @@
   let pdfFile;
   let pdfName = "";
   let selectedEntity;
+  let contractType = "Contract";
+  $: isFMContract = contractType === "FM Contract";
+  $: entities = isFMContract
+    ? placeHolders.FMContractEntities
+    : placeHolders.Entities;
   let pages = [];
   let pagesScale = [];
   let allObjects = [];
@@ -66,7 +71,17 @@
   function removeSignatory(index) {
     signatories = signatories.filter((_, i) => i !== index);
     placeHolders.RemoveChildren("Signatories", index);
-    _placeholders = placeHolders.GetChilderns(selectedEntity);
+    _placeholders = getChildren(selectedEntity);
+  }
+  function getChildren(entity) {
+    return isFMContract
+      ? placeHolders.GetFMContractChildren(entity)
+      : placeHolders.GetChilderns(entity);
+  }
+  function contractTypeChange(e) {
+    contractType = e.target.value;
+    selectedEntity = undefined;
+    _placeholders = [];
   }
   function handleSignatoryInput({ detail }, index) {
     signatories[index] = detail.signatory;
@@ -80,7 +95,7 @@
         },
       ]);
     }
-    _placeholders = placeHolders.GetChilderns(selectedEntity);
+    _placeholders = getChildren(selectedEntity);
   }
   async function onUploadPDF(e) {
     const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
@@ -118,7 +133,7 @@
 
   function entityChange(e) {
     if (e.target.value) {
-      _placeholders = placeHolders.GetChilderns(e.target.value);
+      _placeholders = getChildren(e.target.value);
       selectedEntity = e.target.value;
     }
   }
@@ -340,13 +355,26 @@
       </div> -->
     <!-- <a href="/editpdf/5646546544646" use:link replace>Replace this URL</a> -->
     <div class="flex flex-col justify-center md:mr-4">
-      <label class="md:mr-2">Entities</label>
-      <select on:change={entityChange} class="p-1 rounded-xs border">
-        <option disabled selected>--Select--</option>
-        {#each placeHolders.Entities as entity, i (entity)}
-          <option value={entity}>{entity}</option>
-        {/each}
+      <label class="md:mr-2">Contract Type</label>
+      <select
+        on:change={contractTypeChange}
+        value={contractType}
+        class="p-1 rounded-xs border"
+      >
+        <option value="Contract">Contract</option>
+        <option value="FM Contract">FM Contract</option>
       </select>
+    </div>
+    <div class="flex flex-col justify-center md:mr-4">
+      <label class="md:mr-2">Entities</label>
+      {#each [contractType] as type (type)}
+        <select on:change={entityChange} class="p-1 rounded-xs border">
+          <option disabled selected>--Select--</option>
+          {#each entities as entity, i (entity)}
+            <option value={entity}>{placeHolders.EntityLabel(entity)}</option>
+          {/each}
+        </select>
+      {/each}
     </div>
     <div class="flex flex-col justify-center md:mr-4">
       <label class="md:mr-2">PlaceHolders</label>
@@ -409,6 +437,7 @@
     shadow-lg h-fit h-full overflow-scroll"
     >
       <Setting
+        fmContract={isFMContract}
         on:cancel={() => {
           saving = false;
           openSaveDialogue = false;

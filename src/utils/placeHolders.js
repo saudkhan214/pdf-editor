@@ -15856,9 +15856,120 @@ export let placeHolders = {
     }
   ],
 
+  // FM Contract categories, same as the Contract Template Builder's FM Contract file
+  fmContractEntities: [
+    "Landlord",
+    "Tenant",
+    "Portfolio",
+    "Unit",
+    "Property Details",
+    "Contract Company Details",
+    "Work Order Details",
+    "Quotation Details",
+  ],
+
+  // Builder shows "Contract Company Details" as "Company Details"
+  fmContractEntityLabels: {
+    "Contract Company Details": "Company Details",
+  },
+
+  // FM Contract-only categories (from BindingTemplate.xml), not part of the Contract entities
+  fmContractData: [
+    {
+      PlaceHolder: [
+        { _name: "Company Name", _datafield: "ContractCompany.Name", _case: "Contract" },
+        { _name: "Contact Person", _datafield: "ContractCompany.ContactPerson", _case: "Contract" },
+        { _name: "Phone", _datafield: "ContractCompany.Phone", _case: "Contract" },
+        { _name: "Mobile", _datafield: "ContractCompany.Mobile", _case: "Contract" },
+        { _name: "Email", _datafield: "ContractCompany.Email", _case: "Contract" },
+        { _name: "Postal Address", _datafield: "ContractCompany.PostalAddress", _case: "Contract" },
+        { _name: "Trade License No.", _datafield: "ContractCompany.TradeLicenseNo", _case: "Contract" },
+        { _name: "TRN Certificate", _datafield: "ContractCompany.TrnCertificate", _case: "Contract" },
+      ],
+      _name: "Contract Company Details",
+      _case: "Contract",
+    },
+    {
+      PlaceHolder: [
+        { _name: "Work Order Reference Number", _datafield: "ContractWorkOrder.ReferenceNo", _case: "Contract" },
+        { _name: "Work Order Service Type", _datafield: "ContractWorkOrder.ServiceType", _case: "Contract" },
+        { _name: "Work Order Category", _datafield: "ContractWorkOrder.Category", _case: "Contract" },
+        { _name: "Work Order Priority", _datafield: "ContractWorkOrder.Priority", _case: "Contract" },
+        { _name: "Work Order Status", _datafield: "ContractWorkOrder.Status", _case: "Contract" },
+        { _name: "Work Order Assigned To", _datafield: "ContractWorkOrder.AssignedTo", _case: "Contract" },
+        { _name: "Work Order Contractor Type", _datafield: "ContractWorkOrder.ContractorType", _case: "Contract" },
+        { _name: "Work Order Contact Name", _datafield: "ContractWorkOrder.ContactName", _case: "Contract" },
+        { _name: "Work Order Contact No", _datafield: "ContractWorkOrder.ContactNo", _case: "Contract" },
+        { _name: "Work Order Requested By", _datafield: "ContractWorkOrder.RequestedBy", _case: "Contract" },
+        { _name: "Work Order Mode of Request", _datafield: "ContractWorkOrder.ModeOfRequest", _case: "Contract" },
+        { _name: "Work Order Portfolio", _datafield: "ContractWorkOrder.Portfolio", _case: "Contract" },
+        { _name: "Work Order Property", _datafield: "ContractWorkOrder.Property", _case: "Contract" },
+        { _name: "Work Order Unit Number", _datafield: "ContractWorkOrder.UnitNumber", _case: "Contract" },
+        { _name: "Work Order Common Area", _datafield: "ContractWorkOrder.CommonArea", _case: "Contract" },
+        { _name: "Work Order Other Location", _datafield: "ContractWorkOrder.OtherLocation", _case: "Contract" },
+        { _name: "Work Order Remarks", _datafield: "ContractWorkOrder.Remarks", _case: "Contract" },
+        { _name: "Work Order Key Access", _datafield: "ContractWorkOrder.KeyAccess", _case: "Contract" },
+        { _name: "Work Order Tenant Present", _datafield: "ContractWorkOrder.TenantPresent", _case: "Contract" },
+        { _name: "Work Order Tenant Name", _datafield: "ContractWorkOrder.TenantName", _case: "Contract" },
+        { _name: "Work Order Tenant Tel", _datafield: "ContractWorkOrder.TenantTel", _case: "Contract" },
+        { _name: "Work Order Available Days", _datafield: "ContractWorkOrder.AvailableDays", _case: "Contract" },
+        { _name: "Work Order Available Time", _datafield: "ContractWorkOrder.AvailableTime", _case: "Contract" },
+        { _name: "Work Order Location", _datafield: "ContractWorkOrder.Location", _case: "Contract" },
+        { _name: "Work Order Portfolio Manager", _datafield: "ContractWorkOrder.PortfolioManager", _case: "Contract" },
+        { _name: "Work Order Tenant Email", _datafield: "ContractWorkOrder.TenantEmail", _case: "Contract" },
+        { _name: "Work Order Tenant Company", _datafield: "ContractWorkOrder.TenantCompany", _case: "Contract" },
+      ],
+      _name: "Work Order Details",
+      _case: "Contract",
+    },
+    {
+      PlaceHolder: [
+        { _name: "Quote Number", _datafield: "ContractQuote.Number", _case: "Contract" },
+      ],
+      _name: "Quotation Details",
+      _case: "Contract",
+    },
+  ],
+
+  // FM Contract placeholders in BindingTemplate.xml that are missing from data above
+  fmContractExtras: [
+    { _entity: "Landlord", _name: "Landlord Last Name", _datafield: "LandlordLastName", _case: "Contract" },
+    { _entity: "Tenant", _name: "Tenant Last Name", _datafield: "TenantLastName", _case: "Contract" },
+    { _entity: "Portfolio", _name: "All Properties", _datafield: "AllProperties", _case: "Contract" },
+    { _entity: "Portfolio", _name: "All Units", _datafield: "AllUnits", _case: "Contract" },
+    { _entity: "Unit", _name: "DEWA No.", _datafield: "ConsumerNumber" },
+    { _entity: "Unit", _name: "Unit Classification", _datafield: "UnitTypeClassification", _case: "Contract" },
+    { _entity: "Unit", _name: "Exclusive/Non Exclusive", _datafield: "Mandate" },
+  ],
+
   get Entities() {
     // return this.data.filter((a) => a._case == "all").map((obj) => obj._name);
     return this.data.map((obj) => obj._name);
+  },
+
+  get FMContractEntities() {
+    return [...this.fmContractEntities, "Signatories"];
+  },
+
+  EntityLabel(entity) {
+    return this.fmContractEntityLabels[entity] || entity;
+  },
+
+  // Mirrors ContractService.GetMaintenancePlaceHolders (contract type = Contract)
+  GetFMContractChildren(parentkey) {
+    if (!this.fmContractEntities.includes(parentkey)) {
+      return this.GetChilderns(parentkey);
+    }
+    const isUnit = parentkey === "Unit";
+    const children = [...this.data, ...this.fmContractData]
+      .filter((a) => a._name === parentkey && (isUnit || a._case == "Contract" || a._case == "all"))
+      .map((a) => a.PlaceHolder)
+      .flat()
+      .filter((p) => p && (isUnit || p._case == "Contract"));
+    const extras = this.fmContractExtras
+      .filter((p) => p._entity === parentkey)
+      .map(({ _entity, ...p }) => p);
+    return [...children, ...extras].sort((a, b) => a._name.localeCompare(b._name));
   },
 
   GetChilderns(parentkey) {

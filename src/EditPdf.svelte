@@ -38,6 +38,12 @@
   let contractInfo = null;
   let selectedPageIndex = -1;
   let selectedEntity;
+  let contractType = "Contract";
+  let originalFileSettings = null;
+  $: isFMContract = contractType === "FM Contract";
+  $: entities = isFMContract
+    ? placeHolders.FMContractEntities
+    : placeHolders.Entities;
   let saving = false;
   let openSaveDialogue = false;
   let addingDrawing = false;
@@ -76,6 +82,16 @@
         pdfBlob = new Blob([byteArray], { type: "application/pdf" });
         pdfName = pdfJsonData.pdfName;
         contractInfo = pdfJsonData.contract;
+        if (contractInfo) {
+          originalFileSettings = {
+            zone: contractInfo.zone,
+            status: contractInfo.status,
+            useTransaction: contractInfo.useTransaction,
+          };
+          if (String(contractInfo.zone) === "16") {
+            contractType = "FM Contract";
+          }
+        }
         const _signatories = allObjects
           .flat() // flatten the outer array
           .filter((item) => item.type === "signatory") // filter only signatory items
@@ -165,7 +181,20 @@
   function removeSignatory(index) {
     signatories = signatories.filter((_, i) => i !== index);
     placeHolders.RemoveChildren("Signatories", index);
-    _placeholders = placeHolders.GetChilderns(selectedEntity);
+    _placeholders = getChildren(selectedEntity);
+  }
+  function getChildren(entity) {
+    return isFMContract
+      ? placeHolders.GetFMContractChildren(entity)
+      : placeHolders.GetChilderns(entity);
+  }
+  function contractTypeChange(e) {
+    contractType = e.target.value;
+    selectedEntity = undefined;
+    _placeholders = [];
+    if (!isFMContract && contractInfo && originalFileSettings) {
+      contractInfo = { ...contractInfo, ...originalFileSettings };
+    }
   }
   function handleSignatoryInput({ detail }, index) {
     signatories[index] = detail.signatory;
@@ -179,7 +208,7 @@
         },
       ]);
     }
-    _placeholders = placeHolders.GetChilderns(selectedEntity);
+    _placeholders = getChildren(selectedEntity);
   }
   async function onUploadPDF(e) {
     const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
@@ -256,7 +285,7 @@
   // }
   function entityChange(e) {
     if (e.target.value) {
-      _placeholders = placeHolders.GetChilderns(e.target.value);
+      _placeholders = getChildren(e.target.value);
       selectedEntity = e.target.value;
     }
   }
@@ -541,13 +570,22 @@
           </label>
         </div> -->
     <div class="flex flex-col justify-center md:mr-4">
-      <label class="md:mr-2">Entities</label>
-      <select on:change={entityChange}>
-        <option disabled selected>--Select--</option>
-        {#each placeHolders.Entities as entity, i (entity)}
-          <option value={entity}>{entity}</option>
-        {/each}
+      <label class="md:mr-2">Contract Type</label>
+      <select on:change={contractTypeChange} value={contractType}>
+        <option value="Contract">Contract</option>
+        <option value="FM Contract">FM Contract</option>
       </select>
+    </div>
+    <div class="flex flex-col justify-center md:mr-4">
+      <label class="md:mr-2">Entities</label>
+      {#each [contractType] as type (type)}
+        <select on:change={entityChange}>
+          <option disabled selected>--Select--</option>
+          {#each entities as entity, i (entity)}
+            <option value={entity}>{placeHolders.EntityLabel(entity)}</option>
+          {/each}
+        </select>
+      {/each}
     </div>
     <div class="flex flex-col justify-center md:mr-4">
       <label class="md:mr-2">PlaceHolders</label>
@@ -609,6 +647,7 @@
     >
       <Setting
         contract={contractInfo}
+        fmContract={isFMContract}
         on:cancel={() => {
           saving = false;
           openSaveDialogue = false;

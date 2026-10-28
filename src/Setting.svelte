@@ -12,6 +12,13 @@
     status: "512",
     useTransaction: false,
   };
+  export let fmContract = false;
+  if (fmContract) {
+    contract.zone = "16"; // FM / Maintenance Contract
+    contract.status = "512"; // set 512 for maintenance contract
+    contract.useTransaction = false;
+    contract.module = "8"; // FM Contract is Property Management only
+  }
   $: contract.module = String(contract.module);
   $: contract.zone = String(contract.zone);
   $: contract.status = String(contract.status);
@@ -153,11 +160,15 @@
           name="module"
           bind:value={contract.module}
         >
-          <option selected disabled value="">--Select--</option>
-          <option value="8">Property Management</option>
-          <option value="2">Rent</option>
-          <option value="1">Sale</option>
-          <option value="13">Short Term Rental</option>
+          {#if fmContract}
+            <option value="8">Property Management</option>
+          {:else}
+            <option selected disabled value="">--Select--</option>
+            <option value="8">Property Management</option>
+            <option value="2">Rent</option>
+            <option value="1">Sale</option>
+            <option value="13">Short Term Rental</option>
+          {/if}
         </select>
       </div>
 
@@ -214,6 +225,7 @@
           name="zone"
           on:change={handleFileChange}
           bind:value={contract.zone}
+          disabled={fmContract}
         >
           <option selected disabled>--Select--</option>
           <option value="2">Unit</option>
